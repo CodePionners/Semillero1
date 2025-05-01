@@ -1,5 +1,12 @@
+// ¡Este bloque de plugins debe estar al principio del archivo!
 plugins {
-    id("java")
+    id("java") // El plugin base de Java
+    // ¡Asegúrate de que los plugins de Spring Boot y Dependency Management estén aquí!
+    id("org.springframework.boot") version "3.4.5"
+    id("io.spring.dependency-management") version "1.1.4"
+    // Si usas Kotlin, también deben estar aquí los plugins de Kotlin:
+    // kotlin("jvm") version "TU_VERSION_DE_KOTLIN"
+    // kotlin("plugin.spring") version "TU_VERSION_DE_KOTLIN"
 }
 
 group = "org.example"
@@ -9,31 +16,32 @@ repositories {
     mavenCentral()
 }
 
+// ¡Solo debe haber un bloque de dependencies!
 dependencies {
+    // Dependencias de prueba de JUnit
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    dependencies {
-        // Dependencias que ya podrían estar aquí
-        implementation("org.springframework.boot:spring-boot-starter-web")
-        implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-        developmentOnly("org.springframework.boot:spring-boot-devtools")
-        runtimeOnly("com.h2database:h2") // H2 suele ser runtimeOnly o implementation
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-        // ---> AÑADE ESTA LÍNEA <---
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // Dependencias de Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-        // Otras dependencias...
-    }
+    // ¡Ahora developmentOnly debería ser reconocido porque el plugin está aplicado correctamente!
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    // Dependencias de base de datos (H2)
+    runtimeOnly("com.h2database:h2") // O implementation, según tu necesidad
+
+    // Dependencias de prueba de Spring Boot
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Dependencia de Spring Data JPA (si la añadiste)
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    // Otras dependencias que tengas...
+
+    // ¡El bloque plugins que tenías aquí DEBE ELIMINARSE de este lugar!
+    // Ya lo movimos al principio del archivo.
 }
 
-tasks.test {
-    useJUnitPlatform()
-
-    plugins {
-        id("org.springframework.boot") version "TU_VERSION_DE_SPRING_BOOT" // Asegúrate de usar la versión correcta
-        id("io.spring.dependency-management") version "TU_VERSION_DE_DEPENDENCY_MANAGEMENT" // Este también es común con Spring Boot
-        kotlin("jvm") version "TU_VERSION_DE_KOTLIN" // Si usas Kotlin
-        kotlin("plugin.spring") version "TU_VERSION_DE_KOTLIN" // Si usas Kotlin y plugin de Spring
-    }
-}
+// Cualquier otra configuración de Gradle (tareas, etc.) iría después del bloque dependencies
