@@ -3,16 +3,19 @@ package org.sistemadegestiondelesionescutaneas.service;
 import org.sistemadegestiondelesionescutaneas.model.Usuario;
 import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 public class Autenticacion {
 
     private final Usuariorepositorio usuarioRepositorio;
+    private final BCryptPasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public Autenticacion (Usuariorepositorio usuarioRepositorio) {
+    public Autenticacion(Usuariorepositorio usuarioRepositorio) {
         this.usuarioRepositorio = usuarioRepositorio;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario registrousuario(String usuario, String contrasena, String rol, String nombre, String email) {
@@ -22,7 +25,7 @@ public class Autenticacion {
         }
 
         //    Hashear las contraseñas en texto plano!
-        String hashedPassword = hashPassword(contrasena); // Implementar hashPassword()
+        String hashedPassword = passwordEncoder.encode(contrasena);
 
         // 3. Crear el nuevo usuario
         Usuario nuevousuario = new Usuario(usuario, hashedPassword, rol, nombre, email);
@@ -37,22 +40,10 @@ public class Autenticacion {
             return null; // Usuario no encontrado
         }
 
-        // Verificar la contraseña hasheada
-        if (verificarcontrasena(contrasena, usuario1.getContrasena())) { // Implementar verifyPassword()
+        if (passwordEncoder.matches(contrasena, usuario1.getContrasena())) { // Verificar la contraseña
             return usuario1;
         } else {
-            return null; // Contraseña incorrecta
+            return null;
         }
-    }
-
-    private String hashPassword(String contrasena) {
-        // Implementar un algoritmo de hash seguro (BCrypt, Argon2)
-        // ¡NO uses MD5 o SHA-1 para contraseñas!
-        return contrasena; // Reemplazar con la implementación real
-    }
-
-    private boolean verificarcontrasena(String contrasena, String hashedPassword) {
-        // Implementar la verificación de la contraseña hasheada
-        return contrasena.equals(hashedPassword); // Reemplazar con la implementación real
     }
 }

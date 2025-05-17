@@ -39,6 +39,10 @@ dependencies {
 
     // Dependencia de Spring Security para hashear las contraseñas
     implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // Dependencia conexion con base de datos mysql
+    implementation("com.mysql:mysql-connector-j:8.3.0")  // O la versión más reciente
 }
+
 
 // Cualquier otra configuración de Gradle (tareas, etc.) iría después del bloque dependencies

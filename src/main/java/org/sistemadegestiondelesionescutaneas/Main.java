@@ -1,6 +1,7 @@
 src/
         └── main/
         └── java/
+        └── Bean/
         ├── controller/     <-- Lógica de negocio (gestión de imágenes)
            ├── model/          <-- Representación de datos (objetos Lesión, Historial)
            └── view/           <-- Interfaz gráfica (opcional: Swing o consola)
