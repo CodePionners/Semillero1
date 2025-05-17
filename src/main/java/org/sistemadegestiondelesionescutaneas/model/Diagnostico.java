@@ -2,7 +2,6 @@ package org.sistemadegestiondelesionescutaneas.model;
 
 public Cons Diagnostico{
     Benigna("Benigna"),
-    Sospechosa("Sospechosa de malignidad"),
     Maligna("Maligna"),
     Indeterminado("Indeterminado");
 

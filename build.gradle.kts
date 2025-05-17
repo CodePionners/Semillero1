@@ -1,4 +1,3 @@
-// ¡Este bloque de plugins debe estar al principio del archivo!
 plugins {
     id("java") // El plugin base de Java
     // ¡Asegúrate de que los plugins de Spring Boot y Dependency Management estén aquí!
@@ -35,13 +34,11 @@ dependencies {
     // Dependencias de prueba de Spring Boot
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    // Dependencia de Spring Data JPA (si la añadiste)
+    // Dependencia de Spring Data JPA
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
-    // Otras dependencias que tengas...
-
-    // ¡El bloque plugins que tenías aquí DEBE ELIMINARSE de este lugar!
-    // Ya lo movimos al principio del archivo.
+    // Dependencia de Spring Security para hashear las contraseñas
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 // Cualquier otra configuración de Gradle (tareas, etc.) iría después del bloque dependencies

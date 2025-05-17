@@ -2,7 +2,7 @@ package org.sistemadegestiondelesionescutaneas.model;
 
 import java.time.LocalDateTime;
 
-public class Historial {
+public class Historiaclinica {
     private String id;
     private Paciente paciente; // Relación Muchos a Uno
 
