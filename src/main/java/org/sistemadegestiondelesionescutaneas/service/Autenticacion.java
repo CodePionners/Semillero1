@@ -4,6 +4,8 @@ import org.sistemadegestiondelesionescutaneas.model.Usuario;
 import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class Autenticacion {
@@ -24,7 +26,10 @@ public class Autenticacion {
             throw new IllegalArgumentException("Usuario ya existe");
         }
 
-        //    Hashear las contraseñas en texto plano!
+        if (usuarioRepositorio.findByEmail(email) != null) {
+            throw new IllegalArgumentException("Email ya registrado");
+        }
+            //    Hashear las contraseñas en texto plano!
         String hashedPassword = passwordEncoder.encode(contrasena);
 
         // 3. Crear el nuevo usuario

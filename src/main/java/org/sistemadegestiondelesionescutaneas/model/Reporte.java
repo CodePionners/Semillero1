@@ -1,58 +1,54 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "historial_lesiones_previas")
-public class HistorialLesionPrevia {
+@Table(name = "reportes")
+public class Reporte {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_historial_lesion")
+    @Column(name = "id_reporte")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_paciente", nullable = false) // FK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_analisis_referencia")
+    private AnalisisDermatologico analisisReferencia;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) // Cada reporte pertenece a un paciente
+    @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
 
-    private LocalDate fechainicio;
-    private LocalDate fechaderesolucion;
+    @Column(nullable = false)
+    private LocalDateTime fechaGeneracion;
 
-    @Column(length = 100)
-    private String tipodelesion; //Previa y actual
-
-    @Column(length = 255)
-    private String tratamientorecibido;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TipoReporte tipoReporte;
 
     @Column(length = 255)
-    private String resultadotratamiento;
+    private String nombreArchivoGenerado;
 
     @Lob
-    private String complicaciones;
+    private String contenidoTexto;
 
-    @Column(length = 255)
-    private String condicionpreexistente; //dermatitis, diabetes
-
-
-    public HistorialLesionPrevia() {}
+    public Reporte() {
+        this.fechaGeneracion = LocalDateTime.now();
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public AnalisisDermatologico getAnalisisReferencia() { return analisisReferencia; }
+    public void setAnalisisReferencia(AnalisisDermatologico analisisReferencia) { this.analisisReferencia = analisisReferencia; }
     public Paciente getPaciente() { return paciente; }
     public void setPaciente(Paciente paciente) { this.paciente = paciente; }
-    public LocalDate getFechainicio() { return fechainicio; }
-    public void setFechainicio(LocalDate fechainicio) { this.fechainicio = fechainicio; }
-    public LocalDate getFechaderesolucion() { return fechaderesolucion; }
-    public void setFechaderesolucion(LocalDate fechaderesolucion) { this.fechaderesolucion = fechaderesolucion; }
-    public String getTipodelesion() { return tipodelesion; }
-    public void setTipodelesion(String tipodelesion) { this.tipodelesion = tipodelesion; }
-    public String getTratamientorecibido() { return tratamientorecibido; }
-    public void setTratamientorecibido(String tratamientorecibido) { this.tratamientorecibido = tratamientorecibido; }
-    public String getResultadotratamiento() { return resultadotratamiento; }
-    public void setResultadotratamiento(String resultadotratamiento) { this.resultadotratamiento = resultadotratamiento; }
-    public String getComplicaciones() { return complicaciones; }
-    public void setComplicaciones(String complicaciones) { this.complicaciones = complicaciones; }
-    public String getCondicionpreexistente() { return condicionpreexistente; }
-    public void setCondicionpreexistente(String condicionpreexistente) { this.condicionpreexistente = condicionpreexistente; }
+    public LocalDateTime getFechaGeneracion() { return fechaGeneracion; }
+    public void setFechaGeneracion(LocalDateTime fechaGeneracion) { this.fechaGeneracion = fechaGeneracion; }
+    public TipoReporte getTipoReporte() { return tipoReporte; }
+    public void setTipoReporte(TipoReporte tipoReporte) { this.tipoReporte = tipoReporte; }
+    public String getNombreArchivoGenerado() { return nombreArchivoGenerado; }
+    public void setNombreArchivoGenerado(String nombreArchivoGenerado) { this.nombreArchivoGenerado = nombreArchivoGenerado; }
+    public String getContenidoTexto() { return contenidoTexto; }
+    public void setContenidoTexto(String contenidoTexto) { this.contenidoTexto = contenidoTexto; }
 }
