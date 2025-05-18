@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons Diagnostico{
+private enum Diagnostico{
     Benigna("Benigna"),
     Maligna("Maligna"),
     Indeterminado("Indeterminado");

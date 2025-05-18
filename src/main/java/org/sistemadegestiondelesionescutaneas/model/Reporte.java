@@ -3,7 +3,8 @@ package org.sistemadegestiondelesionescutaneas.model;
 import java.time.LocalDateTime;
 
 public class Reporte {
-    private String id;
+    private Integer id;
+    private Integer id_analisis_referencia;
     private Paciente paciente; // Relación Muchos a Uno
 
     private LocalDateTime fechahorageneracion; //MODIFICADO

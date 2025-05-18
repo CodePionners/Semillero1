@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons Sexo {
+public enum Sexo {
     MASCULINO("Masculino"),
     FEMENINO("Femenino"),
     OTRO("Otro / No especificado");

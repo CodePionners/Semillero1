@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons tiporeporte {
+public enum tiporeporte {
        Seguimiento("Reporte Seguimiento"),
        Diagnostico("Reporte Diagnostico");
 

@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons areacorporalafectada {
+public enum areacorporalafectada {
     Cabeza y cuello ("Cuero cabelludo, cara, cuello y orejas"),
     Tronco("Pecho,abdomen, espalda y region lumbar"),
     Extremidades superiores("Brazos, manos y muñecas"),

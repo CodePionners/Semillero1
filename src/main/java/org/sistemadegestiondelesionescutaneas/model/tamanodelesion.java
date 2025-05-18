@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons tamanodelesion{
+public enum tamanodelesion{
     Diametro("La medida de la lesion de un lado a otro"),
     Superficie("El area total que ocupa la lesion en la piel"),
     Profundidad("La extension de la lesion hacia dentro de la piel"),

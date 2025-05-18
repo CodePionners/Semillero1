@@ -1,6 +1,6 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public Cons tipopielfitzpatrick {
+public enum tipopielfitzpatrick {
 I("Piel muy clara, siempre se quema, nunca se broncea"),
 II("Piel clara, se quema fácilmente, se broncea con dificultad"),
 III("Piel clara a ligeramente oscura, se quema ocasionalmente, se broncea gradualmente"),
