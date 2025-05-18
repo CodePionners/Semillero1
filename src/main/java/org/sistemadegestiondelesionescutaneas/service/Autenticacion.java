@@ -13,13 +13,11 @@ public class Autenticacion {
     private final Usuariorepositorio usuarioRepositorio;
     private final BCryptPasswordEncoder passwordEncoder;
 
-
     @Autowired
-    public Autenticacion(Usuariorepositorio usuarioRepositorio) {
+    public Autenticacion(Usuariorepositorio usuarioRepositorio, BCryptPasswordEncoder passwordEncoder) { // Añadir BCryptPasswordEncoder como parámetro
         this.usuarioRepositorio = usuarioRepositorio;
         this.passwordEncoder = passwordEncoder;
     }
-
     public Usuario registrousuario(String usuario, String contrasena, String rol, String nombre, String email) {
         // Validar si el usuario ya existe (usuario o email)
         if (usuarioRepositorio.findByUsuario(usuario) != null) {

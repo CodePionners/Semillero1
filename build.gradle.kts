@@ -42,6 +42,9 @@ dependencies {
 
     // Dependencia conexion con base de datos mysql
     implementation("com.mysql:mysql-connector-j:8.0.40")  // O la versión más reciente
+
+    // Dependencia validation
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 

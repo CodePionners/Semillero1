@@ -17,7 +17,6 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
-}
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, BCryptPasswordEncoder passwordEncoder) throws Exception {
@@ -55,4 +54,4 @@ public class SecurityConfig {
                 );
         return http.build();
     }
-
+}
