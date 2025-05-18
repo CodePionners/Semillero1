@@ -13,41 +13,39 @@ public class AnalisisDermatologico {
     @Column(name = "id_analisis")
     private Long id; // Cambiado de String a Long
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false) //Cada análisis puede tener muchas referencias
-    @JoinColumn(name = "id_analisis_referencia", nullable = false)
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // Cada análisis pertenece a un paciente
-    @JoinColumn(name = "id_paciente", nullable = false)
+    @JoinColumn(name = "id_paciente", nullable = false)  // FK
     private Paciente paciente;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false) // Cada análisis es sobre una imagen
-    @JoinColumn(name = "id_imagen_lesion", nullable = false, unique = true)
+    @OneToOne(fetch = FetchType.LAZY, optional = false) // Cada análisis es sobre una imagen específica
+    @JoinColumn(name = "id_imagen_lesion", nullable = false, unique = true) // FK y Única
     private ImagenLesion imagen;
 
     @Column(nullable = false)
     private LocalDateTime fechahoraanalisis;
 
+    // Atributos Clínicos (considera si algunos deberían ser Enums)
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private Sexo sexo;
+    private Sexo sexo; // Asumiendo Enum Sexo
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) // Si EdadEstimada es un Enum
     @Column(length = 50)
-    private EdadEstimada edadestimada;
+    private EdadEstimada edadestimada; // Asumiendo Enum EdadEstimada
 
     @Enumerated(EnumType.STRING)
     @Column(length = 100)
-    private AreaCorporalAfectada areacorporalafectada;
+    private AreaCorporalAfectada areacorporalafectada; // Asumiendo Enum
 
     @Enumerated(EnumType.STRING)
     @Column(length = 100)
-    private TipoPielFitzpatrick tipopielfitzpatrick;
+    private TipoPielFitzpatrick tipopielfitzpatrick; // Asumiendo Enum
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) // Si Tamanodelesion es un Enum
     @Column(length = 100)
-    private Tamanodelesion tamanodelalesion;
+    private Tamanodelesion tamanodelalesion; // Asumiendo Enum
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) // Si AntecedentesFamiliaresCancer es un Enum
     @Column(length = 100)
     private AntecedentesFamiliaresCancer antecedentesfamiliarescancer;
 
@@ -57,18 +55,16 @@ public class AnalisisDermatologico {
     @Column(nullable = false, length = 50)
     private Diagnostico diagnostico;
 
-    @OneToMany(mappedBy = "id_analisis_referencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Historiaclinica> id_analisis_referencia;
+    @OneToMany(mappedBy = "analisisreferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<EntradaHistorial> entradasHistorial;
 
-    @OneToMany(mappedBy = "id_analisis_referencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Reporte> id_analisis_referencia;
+    @OneToMany(mappedBy = "analisisreferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Reporte> reportesGenerados;
 
     public AnalisisDermatologico() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Long getId_analisis_referencia() { return id_analisis_referencia; }
-    public void setId_analisis_referencia(Long id_analisis_referencia) { this.id_analisis_referencia = id_analisis_referencia; }
     public Paciente getPaciente() { return paciente; }
     public void setPaciente(Paciente paciente) { this.paciente = paciente; }
     public ImagenLesion getImagen() { return imagen; }
@@ -92,8 +88,8 @@ public class AnalisisDermatologico {
     public Diagnostico getDiagnostico() { return diagnostico; }
     public void setDiagnostico(Diagnostico diagnostico) { this.diagnostico = diagnostico; }
 
-    // public List<Historiaclinica> getHistoriaClinica() { return HistoriaClinica; }
-    // public void setHistoriaClinica(List<Historiaclinica> id_analisis_reporte) { this.entradasHistorial = entradasHistorial; }
-    // public List<Reporte> getReportesGenerados() { return reportesGenerados; }
-    // public void setReportesGenerados(List<Reporte> reportesGenerados) { this.reportesGenerados = reportesGenerados; }
+    public List<EntradaHistorial> getEntradasHistorial() { return entradasHistorial; }
+    public void setEntradasHistorial(List<EntradaHistorial> entradasHistorial) { this.entradasHistorial = entradasHistorial; }
+    public List<Reporte> getReportesGenerados() { return reportesGenerados; }
+    public void setReportesGenerados(List<Reporte> reportesGenerados) { this.reportesGenerados = reportesGenerados; }
 }

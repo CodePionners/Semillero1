@@ -10,7 +10,7 @@ public class ImagenLesion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_imagen_lesion")
-    private Long id;
+    private Long id; // Cambiado de String a Long
 
     @Column(nullable = false)
     private String rutaArchivo;
@@ -22,7 +22,6 @@ public class ImagenLesion {
     @JoinColumn(name = "id_paciente", nullable = false) // FK
     private Paciente paciente;
 
-    // Relación análisis es específico para una imagen
     @OneToOne(mappedBy = "imagen", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private AnalisisDermatologico analisisDermatologico;
 

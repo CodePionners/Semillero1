@@ -10,7 +10,7 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Long id; // autoincremental
+    private Long id; // Cambiado de String a Long para PK autoincremental
 
     @Column(unique = true, nullable = false, length = 50)
     private String usuario;
@@ -27,10 +27,11 @@ public class Usuario {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    // Relación opcional con Paciente (si un Usuario tiene un perfil de Paciente)
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Paciente perfilPaciente;
 
-    public Usuario() {
-    }
+
+    public Usuario() {}
 
     public Usuario(String usuario, String contrasena, String rol, String nombre, String email) {
         this.usuario = usuario;
@@ -40,52 +41,24 @@ public class Usuario {
         this.email = email;
     }
 
-    // Getters y Setters para todos los campos, incluyendo el nuevo 'id'
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getUsuario() { return usuario; }
+    public void setUsuario(String usuario) { this.usuario = usuario; }
 
-    public String getUsuario() {
-        return usuario;
-    }
+    public String getContrasena() { return contrasena; }
+    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
 
-    public String getContrasena() {
-        return contrasena;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getRol() {
-        return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    } // Corregido el parámetro de setNombre
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public Paciente getPerfilPaciente() { return perfilPaciente; }
+    public void setPerfilPaciente(Paciente perfilPaciente) { this.perfilPaciente = perfilPaciente; }
 }

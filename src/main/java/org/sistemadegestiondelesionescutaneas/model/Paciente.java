@@ -18,11 +18,13 @@ public class Paciente {
 
     private Integer edad;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) // Asumiendo que Sexo es un Enum
     @Column(length = 20)
-    private Sexo sexo;
+    private Sexo sexo; // Cambiado de String a tipo Enum Sexo
 
-    // Relación opcional con Usuario (si un Paciente está vinculado a una cuenta de Usuario)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario") // FK
+    private Usuario usuario;
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ImagenLesion> imagenes = new ArrayList<>();
@@ -30,9 +32,8 @@ public class Paciente {
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AnalisisDermatologico> analisis = new ArrayList<>();
 
-    // Asumiendo que Historiaclinica es EntradaHistorial y tienes una entidad EntradaHistorial
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<EntradaHistorial> historial = new ArrayList<>(); // Cambiado a EntradaHistorial
+    private List<EntradaHistorial> historial = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Reporte> reportes = new ArrayList<>();
@@ -41,8 +42,10 @@ public class Paciente {
     private List<HistorialLesionPrevia> historialLesionesPrevias = new ArrayList<>();
 
 
+    // Constructores, Getters y Setters
     public Paciente() {}
 
+    // Getters y Setters para todos los campos (incluyendo id y las listas)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }
@@ -61,5 +64,6 @@ public class Paciente {
     public void setReportes(List<Reporte> reportes) { this.reportes = reportes; }
     public List<HistorialLesionPrevia> getHistorialLesionesPrevias() { return historialLesionesPrevias; }
     public void setHistorialLesionesPrevias(List<HistorialLesionPrevia> historialLesionesPrevias) { this.historialLesionesPrevias = historialLesionesPrevias; }
-
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 }
