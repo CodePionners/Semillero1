@@ -28,7 +28,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/registro")
-    public String procesarRegistro(@ModelAttribute("usuario") /@Valid/ Usuario usuario,
+    public String procesarRegistro(@ModelAttribute("usuario") @Valid Usuario usuario,
                                    BindingResult result, // Para errores de validación
                                    RedirectAttributes redirectAttributes) {
 

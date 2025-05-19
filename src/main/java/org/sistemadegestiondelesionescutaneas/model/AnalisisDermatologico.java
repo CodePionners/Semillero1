@@ -43,7 +43,8 @@ public class AnalisisDermatologico {
 
     @Enumerated(EnumType.STRING) // Si Tamanodelesion es un Enum
     @Column(length = 100)
-    private Tamanodelesion tamanodelalesion; // Asumiendo Enum
+    private TamanodeLesion tamanodelesion;
+
 
     @Enumerated(EnumType.STRING) // Si AntecedentesFamiliaresCancer es un Enum
     @Column(length = 100)
@@ -79,8 +80,8 @@ public class AnalisisDermatologico {
     public void setAreacorporalafectada(AreaCorporalAfectada areacorporalafectada) { this.areacorporalafectada = areacorporalafectada; }
     public TipoPielFitzpatrick getTipopielfitzpatrick() { return tipopielfitzpatrick; }
     public void setTipopielfitzpatrick(TipoPielFitzpatrick tipopielfitzpatrick) { this.tipopielfitzpatrick = tipopielfitzpatrick; }
-    public Tamanodelesion getTamanodelalesion() { return tamanodelalesion; }
-    public void setTamanodelalesion(Tamanodelesion tamanodelalesion) { this.tamanodelalesion = tamanodelalesion; }
+    public TamanodeLesion getTamanodelesion() { return tamanodelesion; }
+    public void setTamanodelesion(TamanodeLesion tamanodelesion) { this.tamanodelesion = tamanodelesion; }
     public AntecedentesFamiliaresCancer getAntecedentesfamiliarescancer() { return antecedentesfamiliarescancer; }
     public void setAntecedentesfamiliarescancer(AntecedentesFamiliaresCancer antecedentesfamiliarescancer) { this.antecedentesfamiliarescancer = antecedentesfamiliarescancer; }
     public Boolean getHistoriallesionesprevias() { return historiallesionesprevias; }

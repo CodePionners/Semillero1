@@ -1,6 +1,5 @@
 package org.sistemadegestiondelesionescutaneas.model;
-// Renombrar archivo a TamanoLesion.java
-public enum TamanoLesion {
+public enum TamanodeLesion {
     MENOR_A_0_5_CM("Menor a 0.5 cm"), // ej. < 5mm
     ENTRE_0_5_Y_1_CM("Entre 0.5 cm y 1 cm"),
     ENTRE_1_Y_2_CM("Entre 1 cm y 2 cm"),
@@ -10,7 +9,7 @@ public enum TamanoLesion {
 
     private final String descripcion;
 
-    TamanoLesion(String descripcion) { // El constructor de enum es implícitamente privado
+    TamanodeLesion(String descripcion) {
         this.descripcion = descripcion;
     }
 
