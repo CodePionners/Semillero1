@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-
 @Controller
 public class PageController {
 
@@ -25,10 +24,11 @@ public class PageController {
         return "login"; // Devuelve login.html
     }
 
-    @GetMapping("/")
-    public String homePage(Model model) {
+    @GetMapping("/") // Este es el mapeo principal de la página de inicio
+    public String homePage(Model model) { // Se añadió Model de nuevo, puede ser útil
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
+        // Comprobar si el usuario está autenticado y no es el usuario anónimo
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             for (GrantedAuthority auth : authentication.getAuthorities()) {
                 if ("ROLE_PACIENTE".equals(auth.getAuthority())) {
                     // Aquí puedes cargar datos específicos para el dashboard del paciente si es necesario
@@ -39,10 +39,14 @@ public class PageController {
                     return "dashboard-medico"; // Nueva plantilla HTML
                 } else if ("ROLE_ADMIN".equals(auth.getAuthority())) {
                     // Podrías tener un dashboard de admin también
-                    return "dashboard-admin";
+                    return "dashboard-admin"; // Asumiendo que tienes/tendrás dashboard-admin.html
                 }
             }
+            // Si el usuario está autenticado pero no tiene un rol coincidente,
+            // o si anonymousUser de alguna manera llega aquí y no es capturado por permitAll en SecurityConfig.
+            return "redirect:/login"; // O una página de error genérica, o acceso denegado
         }
+        // Si no está autenticado (p. ej., usuario anónimo accediendo a / directamente antes de que la seguridad actúe para /login)
         return "redirect:/login";
     }
 
@@ -53,10 +57,4 @@ public class PageController {
         // por ejemplo, en UsuarioController como vimos antes.
         return "registro"; // Devuelve registro.html
     }
-
-    @GetMapping("/") // Página principal después de login
-    public String homePage() {
-        return "dashboard"; // Asume que tienes un dashboard.html
-    }
 }
-

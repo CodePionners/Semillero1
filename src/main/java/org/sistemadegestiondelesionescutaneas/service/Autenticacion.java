@@ -7,7 +7,7 @@ import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Autenticacion {
@@ -22,6 +22,8 @@ public class Autenticacion {
         this.usuarioRepositorio = usuarioRepositorio;
         this.passwordEncoder = passwordEncoder;
     }
+
+    @Transactional // Recomendado para atomicidad
     public Usuario registrousuario(String usuario, String contrasena, String rol, String nombre, String email) {
         // Validar si el usuario ya existe (usuario o email)
         if (usuarioRepositorio.findByUsuario(usuario) != null) {
@@ -31,31 +33,35 @@ public class Autenticacion {
         if (usuarioRepositorio.findByEmail(email) != null) {
             throw new IllegalArgumentException("Email ya registrado");
         }
-            //    Hashear las contraseñas en texto plano!
+        //    Hashear las contraseñas en texto plano!
         String hashedPassword = passwordEncoder.encode(contrasena);
 
         // 3. Crear el nuevo usuario
-        Usuario nuevousuario = new Usuario(usuario, hashedPassword, rol, nombre, email);
+        Usuario nuevoUsuario = new Usuario(usuario, hashedPassword, rol.toUpperCase(), nombre, email); // Almacenar rol consistentemente (ej. mayúsculas)
 
-        // 4. Guardar el usuario en la base de datos
-        return usuarioRepositorio.save(nuevousuario);
+        Usuario savedUsuario = usuarioRepositorio.save(nuevoUsuario); // Guardar el usuario primero
 
         if ("PACIENTE".equalsIgnoreCase(rol)) {
             Paciente nuevoPaciente = new Paciente();
-            nuevoPaciente.setUsuario(nuevousuario); // Vincula con el Usuario recién creado
+            nuevoPaciente.setUsuario(savedUsuario); // Vincula con el Usuario recién creado
             nuevoPaciente.setNombre(nombre); // Puedes usar el nombre proporcionado en el registro
+            // Quizás quieras establecer otros campos predeterminados de Paciente aquí
             pacienteRepositorio.save(nuevoPaciente);
+            // Opcional: si tienes una relación bidireccional y quieres establecer Paciente en Usuario
+            // savedUsuario.setPerfilPaciente(nuevoPaciente); // Asegúrate que esto no cause problemas con entidades desconectadas si no es manejado correctamente por JPA
+            // usuarioRepositorio.save(savedUsuario); // Si modificas savedUsuario después del guardado inicial
         }
+        return savedUsuario; // Retornar el usuario guardado
     }
 
     public Usuario loginUser(String usuario, String contrasena) {
-        Usuario usuario1 = usuarioRepositorio.findByUsuario(usuario);
-        if (usuario1 == null) {
+        Usuario usuarioDb = usuarioRepositorio.findByUsuario(usuario); // Variable renombrada para claridad
+        if (usuarioDb == null) {
             return null; // Usuario no encontrado
         }
 
-        if (passwordEncoder.matches(contrasena, usuario1.getContrasena())) { // Verificar la contraseña
-            return usuario1;
+        if (passwordEncoder.matches(contrasena, usuarioDb.getContrasena())) { // Verificar la contraseña
+            return usuarioDb;
         } else {
             return null;
         }
