@@ -2,14 +2,14 @@ plugins {
     java // Plugin base de Java
     id("org.springframework.boot") version "3.2.5" // Versión estable de Spring Boot (ajusta si necesitas una más reciente como 3.3.x, pero 3.4.5 podría ser demasiado nueva o no existir)
     id("io.spring.dependency-management") version "1.1.4" // Plugin para gestionar versiones de dependencias
+    kotlin("jvm")
 }
 
 group = "org.sistemadegestiondelesionescutaneas" // Cambiado para ser más descriptivo
 version = "0.0.1-SNAPSHOT" // Convención común para versiones iniciales
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21 // Especifica la versión de Java que usas
-    targetCompatibility = JavaVersion.VERSION_21
+    // Especifica la versión de Java que usas
 }
 
 repositories {
@@ -40,6 +40,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test") // Para probar la seguridad
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {
@@ -51,4 +52,7 @@ tasks.withType<Test> {
 // si es diferente.
 springBoot {
     mainClass.set("org.sistemadegestiondelesionescutaneas.SalcApplication")
+}
+kotlin {
+    jvmToolchain(21)
 }

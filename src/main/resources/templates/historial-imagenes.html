@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Historial de Imágenes</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <style>
+        .image-gallery { display: flex; flex-wrap: wrap; gap: 10px; }
+        .image-item { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        .image-item img { max-width: 200px; max-height: 200px; display: block; margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Tu Historial de Imágenes</h2>
+    <p><a th:href="@{/dashboard-paciente}">Volver al Dashboard</a></p>
+
+    <div th:if="${#lists.isEmpty(imagenes)}">
+        <p>Aún no has subido ninguna imagen.</p>
+    </div>
+
+    <div class="image-gallery" th:if="${not #lists.isEmpty(imagenes)}">
+        <div th:each="imagen : ${imagenes}" class="image-item">
+            <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
+                 th:alt="'Imagen subida el ' + ${#temporals.format(imagen.fechaSubida, 'dd/MM/yyyy HH:mm')}" />
+            <p th:text="'Subida: ' + ${#temporals.format(imagen.fechaSubida, 'dd/MM/yyyy HH:mm')}"></p>
+
+            <div th:if="${imagen.analisisDermatologico != null}">
+                <p th:text="'Diagnóstico: ' + ${imagen.analisisDermatologico.diagnostico.descripcion}"></p>
+            </div>
+            <div th:if="${imagen.analisisDermatologico == null}">
+                <p>Diagnóstico: Pendiente</p>
+            </div>
+            <form th:method="post" th:action="@{/imagenes/delete/{id}(id=${imagen.id})}" onsubmit="return confirm('¿Está seguro de que desea eliminar esta imagen?');">
+                <button type="submit">Eliminar</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

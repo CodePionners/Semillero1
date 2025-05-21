@@ -1,6 +1,8 @@
 package org.sistemadegestiondelesionescutaneas.service;
 
+import org.sistemadegestiondelesionescutaneas.model.Paciente;
 import org.sistemadegestiondelesionescutaneas.model.Usuario;
+import org.sistemadegestiondelesionescutaneas.repository.Pacienterepositorio;
 import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 public class Autenticacion {
 
     private final Usuariorepositorio usuarioRepositorio;
+    @Autowired
+    private Pacienterepositorio pacienteRepositorio;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -35,6 +39,13 @@ public class Autenticacion {
 
         // 4. Guardar el usuario en la base de datos
         return usuarioRepositorio.save(nuevousuario);
+
+        if ("PACIENTE".equalsIgnoreCase(rol)) {
+            Paciente nuevoPaciente = new Paciente();
+            nuevoPaciente.setUsuario(nuevousuario); // Vincula con el Usuario recién creado
+            nuevoPaciente.setNombre(nombre); // Puedes usar el nombre proporcionado en el registro
+            pacienteRepositorio.save(nuevoPaciente);
+        }
     }
 
     public Usuario loginUser(String usuario, String contrasena) {

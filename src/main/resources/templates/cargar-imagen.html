@@ -1,0 +1,19 @@
+<h3 xmlns:th="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.w3.org/1999/xhtml">Cargar Nueva Imagen de Lesión</h3>
+
+<div th:if="${successMessage}" class="success-message">
+    <p th:text="${successMessage}"></p>
+</div>
+<div th:if="${errorMessage}" class="error-message">
+    <p th:text="${errorMessage}"></p>
+</div>
+
+<form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
+    <div>
+        <label for="file">Seleccionar imagen:</label>
+        <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required />
+    </div>
+    <div>
+        <button type="submit">Cargar Imagen</button>
+    </div>
+</form>

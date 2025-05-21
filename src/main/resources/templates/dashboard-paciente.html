@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard Paciente</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <h2>Bienvenido Paciente, <span th:text="${#authentication.name}">Usuario</span>!</h2>
+    <p>Este es tu panel de control.</p>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Cerrar Sesión</button>
+    </form>
+</div>
+</body>
+</html>
+
+<p><a th:href="@{/imagenes/historial}">Ver mi historial de imágenes</a></p>
