@@ -1,4 +1,4 @@
-package org.sistemadegestiondelesionescutaneas.config;
+package org.sistemadegestiondelesionescutaneas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,4 +16,4 @@ public class SalcApplication {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-}
+}|

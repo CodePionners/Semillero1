@@ -59,7 +59,7 @@ public class AnalisisDermatologico {
     @OneToMany(mappedBy = "analisisreferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<EntradaHistorial> entradasHistorial;
 
-    @OneToMany(mappedBy = "analisisreferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "analisisReferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Reporte> reportesGenerados;
 
     public AnalisisDermatologico() {}
