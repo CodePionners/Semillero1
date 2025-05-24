@@ -9,7 +9,8 @@ group = "org.sistemadegestiondelesionescutaneas"
 version = "0.0.1-SNAPSHOT"
 
 java {
-    // Especifica la versión de Java que usas
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -22,10 +23,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-actuator") // <--- AÑADIR O VERIFICAR ESTA LÍNEA
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    runtimeOnly("com.h2database:h2")
+    runtimeOnly("com.h2database:h2") // Solo si la usas activamente, si no, puedes comentarla.
     implementation("com.mysql:mysql-connector-j:8.3.0")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -42,6 +44,7 @@ tasks.withType<Test> {
 springBoot {
     mainClass.set("org.sistemadegestiondelesionescutaneas.SalcApplication")
 }
+
 kotlin {
     jvmToolchain(21)
 }

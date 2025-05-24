@@ -5,6 +5,7 @@ import org.sistemadegestiondelesionescutaneas.repository.ImagenLesionrepositorio
 import org.sistemadegestiondelesionescutaneas.repository.AnalisisDermatologicorepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy; // Importar Lazy
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.StringUtils;
@@ -22,6 +23,7 @@ import org.sistemadegestiondelesionescutaneas.exception.StorageFileNotFoundExcep
 import org.springframework.security.access.AccessDeniedException;
 
 @Service
+@Lazy // Añadir esta anotación
 public class ImagenStorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImagenStorageService.class);
@@ -82,7 +84,6 @@ public class ImagenStorageService {
             ImagenLesion savedImage = imagenLesionRepositorio.save(imagenLesion);
             logger.info("Registro de ImagenLesion guardado con ID: " + savedImage.getId());
 
-            // ----- INICIO FASE 5.1 (Opción A: Análisis básico automático) -----
             AnalisisDermatologico analisis = new AnalisisDermatologico();
             analisis.setPaciente(paciente);
             analisis.setImagen(savedImage);
@@ -97,7 +98,6 @@ public class ImagenStorageService {
             analisis.setHistoriallesionesprevias(false);
             analisisDermatologicoRepositorio.save(analisis);
             logger.info("Registro de AnalisisDermatologico (placeholder) creado para ImagenLesion ID: " + savedImage.getId());
-            // ----- FIN FASE 5.1 -----
 
         } catch (IOException e) {
             logger.error("Fallo al almacenar archivo " + uniqueFilename, e);

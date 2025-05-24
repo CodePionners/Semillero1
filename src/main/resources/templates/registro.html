@@ -3,35 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro de Usuario</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}"/> </head>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        .error-message { color: red; }
+        .error-text { color: red; font-size: 0.9em; }
+        .success-message { color: green; }
+    </style>
+</head>
 <body>
 <div class="container">
     <h2>Registro de Nuevo Usuario</h2>
-    <div id="message-area"></div> <form id="registrationForm">
-    <div>
-        <label for="nombre">Nombre Completo:</label>
-        <input type="text" id="nombre" name="nombre" required/>
+
+    <div th:if="${errorMessage}" class="error-message">
+        <p th:text="${errorMessage}"></p>
     </div>
-    <div>
-        <label for="usuario">Nombre de Usuario:</label>
-        <input type="text" id="usuario" name="usuario" required/>
+    <div th:if="${successMessage}" class="success-message">
+        <p th:text="${successMessage}"></p>
     </div>
-    <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required/>
+
+    <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Errores globales</p>
     </div>
-    <div>
-        <label for="contraseña">Contraseña:</label>
-        <input type="password" id="contraseña" name="contraseña" required/>
-    </div>
-    <div>
-        <label for="rol">Soy un:</label>
-        <select id="rol" name="rol">
-            <option value="paciente" selected>Paciente</option>
-            <option value="medico">Médico</option>
-        </select>
-    </div>
-    <div>
-        <button type="submit">Registrar</button>
-    </div>
-</form>
+
+    <form id="registrationForm" method="POST" th:action="@{/registro}" th:object="${usuario}">
+        <div>
+            <label for="nombre">Nombre Completo:</label>
+            <input type="text" id="nombre" th:field="*{nombre}" required/>
+            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="error-text"></span>
+        </div>
+        <div>
+            <label for="usuarioInput">Nombre de Usuario:</label> <input type="text" id="usuarioInput" th:field="*{usuario}" required/>
+            <span th:if="${#fields.hasErrors('usuario')}" th:errors="*{usuario}" class="error-text"></span>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" th:field="*{email}" required/>
+            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></span>
+        </div>
+        <div>
+            <label for="contrasena">Contraseña:</label>
+            <input type="password" id="contrasena" th:field="*{contrasena}" required/> <span th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="error-text"></span>
+        </div>
+        <div>
+            <label for="rol">Soy un:</label>
+            <select id="rol" th:field="*{rol}">
+                <option value="PACIENTE">Paciente</option> <option value="MEDICO">Médico</option>
+            </select>
+            <span th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}" class="error-text"></span>
+        </div>
+        <div>
+            <button type="submit">Registrar</button>
+        </div>
+    </form>
+    <p>¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión aquí</a></p>
+</div>
+</body>
+</html>
