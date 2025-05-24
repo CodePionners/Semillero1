@@ -16,4 +16,4 @@ public class SalcApplication {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-}|
+} 

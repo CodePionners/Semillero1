@@ -1,19 +1,30 @@
-<h3 xmlns:th="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
-    xmlns:th="http://www.w3.org/1999/xhtml">Cargar Nueva Imagen de Lesión</h3>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cargar Imagen</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <h2>Cargar Nueva Imagen de Lesión</h2>
+    <p><a th:href="@{/dashboard-paciente}">Volver al Dashboard</a></p>
 
-<div th:if="${successMessage}" class="success-message">
-    <p th:text="${successMessage}"></p>
-</div>
-<div th:if="${errorMessage}" class="error-message">
-    <p th:text="${errorMessage}"></p>
-</div>
+    <div th:if="${successMessage}" class="success-message">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="error-message">
+        <p th:text="${errorMessage}"></p>
+    </div>
 
-<form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
-    <div>
-        <label for="file">Seleccionar imagen:</label>
-        <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required />
-    </div>
-    <div>
-        <button type="submit">Cargar Imagen</button>
-    </div>
-</form>
+    <form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
+        <div>
+            <label for="file">Seleccionar imagen:</label>
+            <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required />
+        </div>
+        <div>
+            <button type="submit">Cargar Imagen</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

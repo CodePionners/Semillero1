@@ -1,33 +1,32 @@
 package org.sistemadegestiondelesionescutaneas.controller
 
 import org.sistemadegestiondelesionescutaneas.exception.StorageFileNotFoundException
-import org.sistemadegestiondelesionescutaneas.model.ImagenLesion // Añadido
-import org.sistemadegestiondelesionescutaneas.model.Paciente // Añadido
+import org.sistemadegestiondelesionescutaneas.model.ImagenLesion
+import org.sistemadegestiondelesionescutaneas.model.Paciente
 import org.sistemadegestiondelesionescutaneas.model.Usuario
-import org.sistemadegestiondelesionescutaneas.repository.ImagenLesionrepositorio // Añadido
+import org.sistemadegestiondelesionescutaneas.repository.ImagenLesionrepositorio
 import org.sistemadegestiondelesionescutaneas.repository.Pacienterepositorio
 import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio
 import org.sistemadegestiondelesionescutaneas.service.ImagenStorageService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.Resource // Añadido para serveFile
-import org.springframework.core.io.UrlResource // Añadido para serveFile
-import org.springframework.http.HttpHeaders // Añadido para serveFile
-import org.springframework.http.MediaType // Añadido para serveFile
+import org.springframework.core.io.Resource
+import org.springframework.core.io.UrlResource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.AccessDeniedException // Asegúrate que esta importación existe si la usas
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model // Añadido
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.IOException
-import java.net.MalformedURLException // Añadido para serveFile
-import java.nio.file.Files // Añadido para serveFile
-import java.nio.file.Path // Añadido para serveFile
-// import java.util.List; // Comentado ya que List es de kotlin.collections en este contexto
+import java.net.MalformedURLException
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Controller
 @RequestMapping("/imagenes")
@@ -40,10 +39,13 @@ class ImagenController {
     private lateinit var usuarioRepositorio: Usuariorepositorio
 
     @Autowired
-    private lateinit var pacienterepositorio: Pacienterepositorio // Inyecta el repositorio de Paciente
+    private lateinit var pacienterepositorio: Pacienterepositorio
 
-    @Autowired // Añadido este repositorio
+    @Autowired
     private lateinit var imagenLesionRepositorio: ImagenLesionrepositorio
+
+    // IMPORTANTE: Asegúrate de que no haya ninguna otra declaración de clase aquí,
+    // especialmente la de "Controladorautenticacion".
 
     @PostMapping("/upload")
     fun handleFileUpload(
@@ -58,103 +60,93 @@ class ImagenController {
 
         val username = authentication.name
         val usuario: Usuario = usuarioRepositorio.findByUsuario(username)
-            ?: run { // Reemplazado !! con operador elvis y bloque run
+            ?: run {
                 redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.")
-                return "redirect:/login" // O una página de error
+                return "redirect:/login"
             }
 
-        // Asumiendo que un Usuario con rol PACIENTE tiene un Paciente asociado
-        // y la relación está configurada en el modelo Usuario <-> Paciente.
-        // Necesitas una forma de obtener el Paciente desde el Usuario.
-        // Si la relación Usuario -> Paciente (OneToOne) se llama 'perfilPaciente' en Usuario:
-        var paciente: Paciente? = usuario.perfilPaciente // Ahora es anulable explícitamente
+        var paciente: Paciente? = usuario.perfilPaciente
         if (paciente == null) {
-            // Intenta encontrar al paciente por el ID del usuario si perfilPaciente no está directamente poblado
-            // Esto asume que Paciente tiene un enlace directo o un esquema de ID compartido.
-            // El comentario original sobre cómo obtener Paciente era complejo.
-            // Por ahora, asumiremos que usuario.perfilPaciente es la forma principal. Si es nulo para un rol PACIENTE,
-            // usualmente indica un problema durante el registro o inconsistencia de datos.
-
-            // Si el usuario es un PACIENTE, debería tener un perfilPaciente.
-            // Si esto es nulo, es probablemente un problema.
-            // El código original tenía: paciente = pacienterepositorio!!.findById(usuario.id).orElse(null)
-            // Esto implica que el ID de Paciente podría ser el mismo que el ID de Usuario. Esto necesita ser confirmado desde el diseño del esquema de BD.
-            // Por ahora, asumiremos que 'usuario.perfilPaciente' debería estar establecido.
-            // Si no, es una condición de error para un PACIENTE subiendo para sí mismo.
-            if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) { // Comprueba el rol del usuario
+            if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) {
                 logger.error("No se encontró el perfil de paciente para el usuario PACIENTE: $username")
                 redirectAttributes.addFlashAttribute("errorMessage", "Perfil de paciente no encontrado. Contacte a soporte.")
-                return "redirect:/dashboard-paciente" // O página de error/dashboard apropiada
+                return "redirect:/dashboard-paciente"
             } else {
-                // Si un MEDICO o ADMIN está subiendo, necesitarían especificar para *cuál* paciente.
-                // Esta lógica no está presente, así que asumiremos por ahora que solo los pacientes suben para sí mismos.
                 logger.error("Lógica de carga para rol ${usuario.rol} no implementada o paciente no especificado.")
                 redirectAttributes.addFlashAttribute("errorMessage", "Funcionalidad no disponible para su rol o paciente no especificado.")
-                return "redirect:/"
+                return "redirect:/" // O al dashboard del médico/admin si tienen otra lógica
             }
         }
-
 
         if (file.isEmpty) {
             redirectAttributes.addFlashAttribute("errorMessage", "Por favor seleccione un archivo para cargar.")
-            return "redirect:/dashboard-paciente" // O la página desde donde se sube
+            return "redirect:/dashboard-paciente"
         }
 
         try {
-            // El 'paciente' aquí debe ser no nulo para el método store.
-            // El bloque anterior debería asegurar que 'paciente' se encuentre o redirigir.
-            imagenStorageService.store(file, paciente!!) // Añadido !! asumiendo que 'paciente' está garantizado como no nulo aquí
+            paciente?.let { // Usar safe call y let para asegurar que paciente no es nulo
+                imagenStorageService.store(file, it)
+                redirectAttributes.addFlashAttribute(
+                    "successMessage", // Cambiado para coincidir con el uso en dashboard-paciente.html
+                    "Archivo cargado exitosamente: " + file.originalFilename
+                )
+            } ?: run {
+                // Esto no debería ocurrir si la lógica anterior de paciente es correcta
+                redirectAttributes.addFlashAttribute("errorMessage", "Error interno: Paciente no disponible para la carga.")
+                return "redirect:/dashboard-paciente"
+            }
+        } catch (e: IOException) { // Captura IOException específicamente para errores de store
+            logger.error("Error de E/S al cargar el archivo: " + file.originalFilename, e)
             redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Archivo cargado exitosamente: " + file.originalFilename
+                "errorMessage", // Cambiado para coincidir
+                "Error de E/S al cargar el archivo: " + e.message
             )
-        } catch (e: Exception) {
-            logger.error("Error al cargar el archivo: " + file.originalFilename, e)
+        } catch (e: Exception) { // Captura genérica para otros errores inesperados
+            logger.error("Error inesperado al cargar el archivo: " + file.originalFilename, e)
             redirectAttributes.addFlashAttribute(
-                "errorMessage",
-                "Error al cargar el archivo: " + e.message
+                "errorMessage", // Cambiado para coincidir
+                "Error inesperado al cargar el archivo: " + e.message
             )
         }
-
-        return "redirect:/dashboard-paciente" // Redirige al dashboard del paciente
+        // Redirigir a una URL que pueda mostrar los mensajes flash.
+        // Si dashboard-paciente.html no los muestra directamente, podrías redirigir con parámetros
+        // o asegurar que la página a la que rediriges (o la que la incluye) pueda leer FlashAttributes.
+        return "redirect:/dashboard-paciente"
     }
 
     @GetMapping("/historial")
-    fun mostrarHistorial( // Sintaxis corregida
-        model: Model, // Sintaxis corregida
+    fun mostrarHistorial(
+        model: Model,
         authentication: Authentication?,
         redirectAttributes: RedirectAttributes
-    ): String { // Sintaxis corregida
-        if (authentication == null || !authentication.isAuthenticated) { // 'isAuthenticated' es una propiedad
-            return "redirect:/login";
+    ): String {
+        if (authentication == null || !authentication.isAuthenticated) {
+            return "redirect:/login"
         }
-        val username = authentication.name; // Sintaxis corregida
-        val usuario: Usuario = usuarioRepositorio.findByUsuario(username) // Sintaxis corregida y manejo de nulos
+        val username = authentication.name
+        val usuario: Usuario = usuarioRepositorio.findByUsuario(username)
             ?: run {
-                redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
-                return "redirect:/login";
+                redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.")
+                return "redirect:/login"
             }
 
-        val paciente: Paciente = usuario.perfilPaciente // Sintaxis corregida y manejo de nulos, getPerfilPaciente() se accede como propiedad
+        val paciente: Paciente = usuario.perfilPaciente
             ?: run {
-// Podrías intentar buscarlo de otra forma si la relación directa no está poblada
-                logger.warn("No se encontró el perfil de paciente para el usuario: " + username + " al ver historial.");
-// Maneja este caso, quizás redirigiendo con un error o a una página para crear perfil.
-// Por ahora, asumimos que si es paciente, el perfil existe.
-                redirectAttributes.addFlashAttribute("errorMessage", "Perfil de paciente no encontrado para ver historial.");
-                return "redirect:/dashboard-paciente"; // O "/"
+                logger.warn("No se encontró el perfil de paciente para el usuario: $username al ver historial.")
+                redirectAttributes.addFlashAttribute("errorMessage", "Perfil de paciente no encontrado para ver historial.")
+                return if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) "redirect:/dashboard-paciente" else "redirect:/"
             }
 
-        // Corregido: Usando el imagenLesionRepositorio autowired
-        val imagenes: List<ImagenLesion> = imagenLesionRepositorio.findByPacienteOrderByFechaSubidaDesc(paciente);
-        model.addAttribute("imagenes", imagenes);
-        return "historial-imagenes"; // Nueva plantilla HTML
+        val imagenes: List<ImagenLesion> = imagenLesionRepositorio.findByPacienteOrderByFechaSubidaDesc(paciente)
+        model.addAttribute("imagenes", imagenes)
+        return "historial-imagenes"
     }
 
     @GetMapping("/view/{filename:.+}")
-    fun serveFile(@PathVariable filename: String): ResponseEntity<Resource> { // Convertido a Kotlin
+    @ResponseBody // Añadido para asegurar que el contenido del archivo se escriba directamente en la respuesta
+    fun serveFile(@PathVariable filename: String): ResponseEntity<Resource> {
         try {
-            val file: Path = imagenStorageService.load(filename) // Usa el método load del servicio
+            val file: Path = imagenStorageService.load(filename)
             val resource: Resource = UrlResource(file.toUri())
             if (resource.exists() || resource.isReadable) {
                 var contentType: String? = null
@@ -163,8 +155,7 @@ class ImagenController {
                 } catch (e: IOException) {
                     logger.warn("No se pudo determinar el tipo de contenido para el archivo: $filename", e)
                 }
-                if(contentType == null) {
-                    // Intenta adivinar basado en la extensión si probeContentType falla
+                if (contentType == null) {
                     contentType = when {
                         filename.lowercase().endsWith(".png") -> MediaType.IMAGE_PNG_VALUE
                         filename.lowercase().endsWith(".jpg") || filename.lowercase().endsWith(".jpeg") -> MediaType.IMAGE_JPEG_VALUE
@@ -174,17 +165,16 @@ class ImagenController {
 
                 return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${resource.filename}\"") // Uso de string template de Kotlin
-                    .body(resource);
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${resource.filename}\"")
+                    .body(resource)
             } else {
-                logger.error("No se pudo leer el archivo: $filename");
-// Podrías devolver una imagen placeholder o un 404 específico
-                return ResponseEntity.notFound().build();
+                logger.error("No se pudo leer el archivo: $filename")
+                return ResponseEntity.notFound().build()
             }
         } catch (e: MalformedURLException) {
-            logger.error("Error al formar la URL para el archivo: $filename", e);
-            return ResponseEntity.badRequest().build();
-        } catch (e: StorageFileNotFoundException) { // Si load puede lanzar esto por no encontrado
+            logger.error("Error al formar la URL para el archivo: $filename", e)
+            return ResponseEntity.badRequest().build()
+        } catch (e: StorageFileNotFoundException) {
             logger.error("Archivo no encontrado al servir: $filename", e)
             return ResponseEntity.notFound().build()
         }
