@@ -4,10 +4,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile // Para configurar opcion
 // y potencialmente en la declaración de dependencias.
 val kotlinVersion = "2.1.21"
 extra["kotlin.version"] = kotlinVersion // Ayuda a Spring Boot a alinear versiones de dependencias de Kotlin.
-
 plugins {
     // 1. Aplicar los plugins de Kotlin POR ID SOLAMENTE.
-    // Las versiones se gestionan centralmente en settings.gradle.kts -> pluginManagement.
+// Las versiones se gestionan centralmente en settings.gradle.kts -> pluginManagement.
     kotlin("jvm") // NO se especifica 'version' aquí
     kotlin("plugin.spring") // NO se especifica 'version' aquí
 
@@ -34,6 +33,7 @@ repositories {
 dependencies {
     // Excluir Tomcat de spring-boot-starter-web
     implementation("org.springframework.boot:spring-boot-starter-web") {
+
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     // Añadir Undertow
@@ -45,15 +45,24 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+    implementation("javax.cache:cache-api:1.1.1")
+    implementation("org.ehcache:ehcache:3.10.8")
+    implementation("org.hibernate.orm:hibernate-jcache:6.6.15.Final")
+
+
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     runtimeOnly("com.h2database:h2")
     implementation("com.mysql:mysql-connector-j:8.3.0")
 
-    // La biblioteca estándar de Kotlin. `kotlin("stdlib-jdk8")` tomará la versión del plugin de Kotlin.
+    // CORREGIDO: La biblioteca estándar de Kotlin.
+    // La función kotlin("stdlib-jdk8") devuelve el descriptor de la dependencia.
+    // Debe ser envuelta por una configuración como 'implementation'.
     implementation(kotlin("stdlib-jdk8"))
-    // Si prefieres ser explícito con la versión de la dependencia (opcional):
+    // Alternativamente, si lo anterior sigue dando problemas o para ser más explícito:
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    // o simplemente:
+    // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8") // La versión será gestionada por el plugin de Kotlin o Spring
 
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))

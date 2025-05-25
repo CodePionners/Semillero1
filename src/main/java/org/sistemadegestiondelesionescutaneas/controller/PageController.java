@@ -46,8 +46,9 @@ public class PageController {
         return "redirect:/login";
     }
 
-    @GetMapping("/mostrar-registro")
-    public String registrationPage() {
-        return "registro";
-    }
+    // ELIMINADO: El siguiente método y mapeo ya no son necesarios
+    // @GetMapping("/mostrar-registro")
+    // public String registrationPage() {
+    //     return "registro";
+    // }
 }

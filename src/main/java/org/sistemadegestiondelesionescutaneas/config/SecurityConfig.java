@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+// BCryptPasswordEncoder se obtiene del bean definido en SalcApplication
 import org.springframework.security.web.SecurityFilterChain;
-// AntPathRequestMatcher ya no se importa explícitamente si no se usa su constructor
-// import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -20,46 +19,41 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Considera habilitar CSRF en producción con la configuración adecuada
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers( // Ya no se usa 'new AntPathRequestMatcher(...)'
-                                "/", //
-                                "/login", //
-                                "/perform_login", //
-                                "/registro", //
-                                "/mostrar-registro", //
-                                "/css/**", //
-                                "/js/**", //
-                                "/imagenes/view/**" //
-                                // Añade aquí cualquier otra ruta pública
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/perform_login",
+                                "/registro",
+                                "/css/**",
+                                "/js/**",
+                                "/imagenes/view/**"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN") //
-                        .requestMatchers("/medico/**").hasRole("MEDICO") //
-                        .requestMatchers("/paciente/**").hasRole("PACIENTE") //
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/medico/**").hasRole("MEDICO")
+                        // Las siguientes reglas específicas deben ir ANTES de reglas más generales como .anyRequest().authenticated()
+                        .requestMatchers("/imagenes/upload").hasAnyRole("PACIENTE", "ADMIN")
+                        .requestMatchers("/imagenes/historial").hasAnyRole("PACIENTE", "ADMIN") // Si solo pacientes y admin pueden ver su propio historial
+                        // Considera si un médico debería poder ver el historial de *sus* pacientes, lo cual requeriría una lógica más compleja
+                        .requestMatchers("/imagenes/delete/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN") // O lógica más fina
+                        // .requestMatchers("/paciente/**").hasRole("PACIENTE") // Esta podría ser demasiado general si las de arriba ya cubren /imagenes/*
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") //
-                        .loginProcessingUrl("/perform_login") //
-                        .defaultSuccessUrl("/", true) //
-                        .failureUrl("/login?error=true") //
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        // Para logoutRequestMatcher, si necesitas especificar el método HTTP (ej. POST),
-                        // puedes usar `new AntPathRequestMatcher("/logout", "POST")` si es estrictamente necesario,
-                        // o mejor aún, configurar logout para que use un endpoint POST y protegerlo con CSRF.
-                        // Si es un GET simple (no recomendado para acciones que cambian estado):
-                        .logoutUrl("/logout") // Manera simplificada si es GET, o usa `logoutRequestMatcher` como antes si es POST
-                        // Si mantienes el logoutRequestMatcher para especificar método POST (recomendado con CSRF):
-                        // .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST")) // Esto aún puede generar warning si AntPathRequestMatcher se elimina
-                        // La alternativa moderna y más segura es asegurar que el logout sea un POST
-                        // y que CSRF esté habilitado. Si CSRF está deshabilitado, logoutUrl es más simple.
-                        .logoutSuccessUrl("/login?logout=true") //
-                        .invalidateHttpSession(true) //
-                        .deleteCookies("JSESSIONID") //
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 )
-                .userDetailsService(customUserDetailsService); // Asegúrate de que tu CustomUserDetailsService está configurado
+                .userDetailsService(customUserDetailsService);
 
         return http.build();
     }

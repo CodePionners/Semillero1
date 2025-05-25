@@ -1,30 +1,32 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-import jakarta.persistence.*; // O javax.persistence.*
-// import java.util.List; // Si decides añadir relaciones inversas
+import jakarta.persistence.*;
+// ... (otras importaciones para caché si las tienes)
 
 @Entity
 @Table(name = "usuarios")
+// ... (anotaciones de caché si las tienes) ...
 public class Usuario {
 
+    // ... (tus campos y constructor) ...
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Long id; // Cambiado de String a Long para PK autoincremental
+    private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(name = "usuario", unique = true, nullable = false, length = 50)
     private String usuario;
 
-    @Column(nullable = false)
+    @Column(name = "contrasena", nullable = false)
     private String contrasena;
 
-    @Column(nullable = false, length = 20)
-    private String rol; // "medico" o "paciente"
+    @Column(name = "rol", nullable = false, length = 20)
+    private String rol;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -41,6 +43,7 @@ public class Usuario {
         this.email = email;
     }
 
+    // ... (tus getters y setters) ...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -61,4 +64,20 @@ public class Usuario {
 
     public Paciente getPerfilPaciente() { return perfilPaciente; }
     public void setPerfilPaciente(Paciente perfilPaciente) { this.perfilPaciente = perfilPaciente; }
+
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "id=" + id +
+                ", usuario='" + usuario + '\'' +
+                // No mostrar la contraseña hasheada en logs por seguridad,
+                // pero sí confirmar si está presente y su longitud.
+                ", contrasenaPresente=" + (contrasena != null && !contrasena.isEmpty()) +
+                ", contrasenaLongitud=" + (contrasena != null ? contrasena.length() : 0) +
+                ", rol='" + rol + '\'' +
+                ", nombre='" + nombre + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }
