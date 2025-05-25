@@ -1,8 +1,22 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile // Para configurar opciones de compilación de Kotlin
+
+// Define la versión de Kotlin explícitamente para usar en 'extra.properties'
+// y potencialmente en la declaración de dependencias.
+val kotlinVersion = "2.1.21"
+extra["kotlin.version"] = kotlinVersion // Ayuda a Spring Boot a alinear versiones de dependencias de Kotlin.
+
 plugins {
+    // 1. Aplicar los plugins de Kotlin POR ID SOLAMENTE.
+    // Las versiones se gestionan centralmente en settings.gradle.kts -> pluginManagement.
+    kotlin("jvm") // NO se especifica 'version' aquí
+    kotlin("plugin.spring") // NO se especifica 'version' aquí
+
+    // 2. Aplicar el plugin de Java
     java
+
+    // 3. Aplicar plugins de Spring Boot y manejo de dependencias
     id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm")
 }
 
 group = "org.sistemadegestiondelesionescutaneas"
@@ -29,18 +43,23 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-actuator") // <--- AÑADIR O VERIFICAR ESTA LÍNEA
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    runtimeOnly("com.h2database:h2") // Solo si la usas activamente, si no, puedes comentarla.
+    runtimeOnly("com.h2database:h2")
     implementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // La biblioteca estándar de Kotlin. `kotlin("stdlib-jdk8")` tomará la versión del plugin de Kotlin.
+    implementation(kotlin("stdlib-jdk8"))
+    // Si prefieres ser explícito con la versión de la dependencia (opcional):
+    // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {
@@ -53,4 +72,10 @@ springBoot {
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "21"
+    }
 }
