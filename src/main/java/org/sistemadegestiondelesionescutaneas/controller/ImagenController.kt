@@ -5,7 +5,7 @@ import org.sistemadegestiondelesionescutaneas.model.ImagenLesion
 import org.sistemadegestiondelesionescutaneas.model.Paciente
 import org.sistemadegestiondelesionescutaneas.model.Usuario
 import org.sistemadegestiondelesionescutaneas.repository.ImagenLesionrepositorio
-import org.sistemadegestiondelesionescutaneas.repository.Pacienterepositorio
+// import org.sistemadegestiondelesionescutaneas.repository.Pacienterepositorio // No parece usarse directamente aquí
 import org.sistemadegestiondelesionescutaneas.repository.Usuariorepositorio
 import org.sistemadegestiondelesionescutaneas.service.ImagenStorageService
 import org.slf4j.Logger
@@ -16,7 +16,7 @@ import org.springframework.core.io.UrlResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException // Asegúrate que esta importación existe si la usas
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -38,14 +38,13 @@ class ImagenController {
     @Autowired
     private lateinit var usuarioRepositorio: Usuariorepositorio
 
-    @Autowired
-    private lateinit var pacienterepositorio: Pacienterepositorio
+    // Pacienterepositorio no se usa directamente, se accede a Paciente a través de Usuario.perfilPaciente
+    // @Autowired
+    // private lateinit var pacienterepositorio: Pacienterepositorio
 
     @Autowired
     private lateinit var imagenLesionRepositorio: ImagenLesionrepositorio
 
-    // IMPORTANTE: Asegúrate de que no haya ninguna otra declaración de clase aquí,
-    // especialmente la de "Controladorautenticacion".
 
     @PostMapping("/upload")
     fun handleFileUpload(
@@ -65,85 +64,95 @@ class ImagenController {
                 return "redirect:/login"
             }
 
-        var paciente: Paciente? = usuario.perfilPaciente
-        if (paciente == null) {
-            if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) {
-                logger.error("No se encontró el perfil de paciente para el usuario PACIENTE: $username")
-                redirectAttributes.addFlashAttribute("errorMessage", "Perfil de paciente no encontrado. Contacte a soporte.")
-                return "redirect:/dashboard-paciente"
-            } else {
-                logger.error("Lógica de carga para rol ${usuario.rol} no implementada o paciente no especificado.")
-                redirectAttributes.addFlashAttribute("errorMessage", "Funcionalidad no disponible para su rol o paciente no especificado.")
-                return "redirect:/" // O al dashboard del médico/admin si tienen otra lógica
+        val paciente: Paciente = usuario.perfilPaciente // Asumimos que si el rol es PACIENTE, perfilPaciente existe.
+            ?: run {
+                if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) {
+                    logger.error("No se encontró el perfil de paciente para el usuario PACIENTE: $username")
+                    redirectAttributes.addFlashAttribute("errorUploadMessage", "Perfil de paciente no encontrado. Contacte a soporte.")
+                } else {
+                    logger.error("Lógica de carga para rol ${usuario.rol} no implementada o paciente no especificado.")
+                    redirectAttributes.addFlashAttribute("errorUploadMessage", "Funcionalidad no disponible para su rol o paciente no especificado.")
+                    // Si no es paciente y no tiene perfil, redirigir a la raíz o dashboard de su rol si existe
+                    return "redirect:/"
+                }
+                return "redirect:/imagenes/historial" // MODIFICADO: Si es paciente y no tiene perfil, va a su dashboard (historial)
             }
-        }
 
         if (file.isEmpty) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Por favor seleccione un archivo para cargar.")
-            return "redirect:/dashboard-paciente"
+            redirectAttributes.addFlashAttribute("errorUploadMessage", "Por favor seleccione un archivo para cargar.")
+            return "redirect:/imagenes/historial" // MODIFICADO
         }
 
         try {
-            paciente?.let { // Usar safe call y let para asegurar que paciente no es nulo
-                imagenStorageService.store(file, it)
-                redirectAttributes.addFlashAttribute(
-                    "successMessage", // Cambiado para coincidir con el uso en dashboard-paciente.html
-                    "Archivo cargado exitosamente: " + file.originalFilename
-                )
-            } ?: run {
-                // Esto no debería ocurrir si la lógica anterior de paciente es correcta
-                redirectAttributes.addFlashAttribute("errorMessage", "Error interno: Paciente no disponible para la carga.")
-                return "redirect:/dashboard-paciente"
-            }
-        } catch (e: IOException) { // Captura IOException específicamente para errores de store
+            imagenStorageService.store(file, paciente)
+            redirectAttributes.addFlashAttribute(
+                "successUploadMessage",
+                "Archivo cargado exitosamente: " + file.originalFilename
+            )
+        } catch (e: IOException) {
             logger.error("Error de E/S al cargar el archivo: " + file.originalFilename, e)
             redirectAttributes.addFlashAttribute(
-                "errorMessage", // Cambiado para coincidir
+                "errorUploadMessage",
                 "Error de E/S al cargar el archivo: " + e.message
             )
-        } catch (e: Exception) { // Captura genérica para otros errores inesperados
+        } catch (e: Exception) {
             logger.error("Error inesperado al cargar el archivo: " + file.originalFilename, e)
             redirectAttributes.addFlashAttribute(
-                "errorMessage", // Cambiado para coincidir
+                "errorUploadMessage",
                 "Error inesperado al cargar el archivo: " + e.message
             )
         }
-        // Redirigir a una URL que pueda mostrar los mensajes flash.
-        // Si dashboard-paciente.html no los muestra directamente, podrías redirigir con parámetros
-        // o asegurar que la página a la que rediriges (o la que la incluye) pueda leer FlashAttributes.
-        return "redirect:/dashboard-paciente"
+        return "redirect:/imagenes/historial" // MODIFICADO
     }
 
     @GetMapping("/historial")
     fun mostrarHistorial(
         model: Model,
         authentication: Authentication?,
-        redirectAttributes: RedirectAttributes
+        redirectAttributes: RedirectAttributes // Para posibles errores al cargar la página
     ): String {
         if (authentication == null || !authentication.isAuthenticated) {
+            // No añadir flash attribute aquí ya que es una redirección GET simple
             return "redirect:/login"
         }
         val username = authentication.name
         val usuario: Usuario = usuarioRepositorio.findByUsuario(username)
             ?: run {
-                redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.")
+                // Considera loguear esto y redirigir a login sin mensaje,
+                // o con un mensaje genérico si se usa model.addAttribute ANTES de redirigir
+                redirectAttributes.addFlashAttribute("errorMessage", "Sesión inválida o usuario no encontrado.")
                 return "redirect:/login"
             }
 
-        val paciente: Paciente = usuario.perfilPaciente
-            ?: run {
-                logger.warn("No se encontró el perfil de paciente para el usuario: $username al ver historial.")
-                redirectAttributes.addFlashAttribute("errorMessage", "Perfil de paciente no encontrado para ver historial.")
-                return if ("PACIENTE".equals(usuario.rol, ignoreCase = true)) "redirect:/dashboard-paciente" else "redirect:/"
-            }
+        // Solo los pacientes deben acceder directamente a esta vista a través de este método.
+        // Otros roles podrían tener sus propias vistas de historial o acceder a través de otros medios.
+        if (!"PACIENTE".equals(usuario.rol, ignoreCase = true)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Acceso no autorizado para este rol.")
+            return "redirect:/" // Redirige a la página principal para otros roles
+        }
 
-        val imagenes: List<ImagenLesion> = imagenLesionRepositorio.findByPacienteOrderByFechaSubidaDesc(paciente)
-        model.addAttribute("imagenes", imagenes)
+        val paciente: Paciente? = usuario.perfilPaciente
+        if (paciente == null) {
+            logger.warn("No se encontró el perfil de paciente para el usuario: $username al ver historial.")
+            // Añadir mensaje al modelo para ser mostrado en historial-imagenes.html en vez de RedirectAttributes
+            model.addAttribute("errorMessage", "Perfil de paciente no encontrado. Contacte a soporte.")
+            model.addAttribute("imagenes", emptyList<ImagenLesion>()) // Enviar lista vacía
+            return "historial-imagenes" // Mostrar la página con el error
+        }
+
+        try {
+            val imagenes: List<ImagenLesion> = imagenLesionRepositorio.findByPacienteOrderByFechaSubidaDesc(paciente)
+            model.addAttribute("imagenes", imagenes)
+        } catch (e: Exception) {
+            logger.error("Error al cargar el historial de imágenes para el paciente ${paciente.id}", e)
+            model.addAttribute("errorMessage", "Error al cargar el historial de imágenes.")
+            model.addAttribute("imagenes", emptyList<ImagenLesion>())
+        }
         return "historial-imagenes"
     }
 
     @GetMapping("/view/{filename:.+}")
-    @ResponseBody // Añadido para asegurar que el contenido del archivo se escriba directamente en la respuesta
+    @ResponseBody
     fun serveFile(@PathVariable filename: String): ResponseEntity<Resource> {
         try {
             val file: Path = imagenStorageService.load(filename)
@@ -165,18 +174,23 @@ class ImagenController {
 
                 return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${resource.filename}\"")
+                    // .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${resource.filename}\"") // Para visualización en línea
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${resource.filename}\"") // Para forzar descarga
                     .body(resource)
             } else {
-                logger.error("No se pudo leer el archivo: $filename")
-                return ResponseEntity.notFound().build()
+                logger.error("No se pudo leer el archivo o no existe: $filename")
+                throw StorageFileNotFoundException("No se pudo leer el archivo: $filename")
             }
         } catch (e: MalformedURLException) {
             logger.error("Error al formar la URL para el archivo: $filename", e)
-            return ResponseEntity.badRequest().build()
+            // No es un error del cliente realmente, sino del servidor o configuración
+            return ResponseEntity.internalServerError().build()
         } catch (e: StorageFileNotFoundException) {
-            logger.error("Archivo no encontrado al servir: $filename", e)
+            logger.warn("Archivo no encontrado al servir: $filename", e)
             return ResponseEntity.notFound().build()
+        } catch (e: IOException) { // Otros errores de I/O al intentar acceder al recurso
+            logger.error("Error de I/O al servir el archivo $filename", e)
+            return ResponseEntity.internalServerError().build()
         }
     }
 
@@ -202,13 +216,16 @@ class ImagenController {
             redirectAttributes.addFlashAttribute("successMessage", "Imagen eliminada correctamente.")
         } catch (e: StorageFileNotFoundException) {
             logger.warn("Intento de eliminar imagen no encontrada ID: $imagenId", e)
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: La imagen no existe.")
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: La imagen no existe o ya fue eliminada.")
         } catch (e: AccessDeniedException) {
             logger.warn("Acceso denegado al intentar eliminar imagen ID: $imagenId por usuario: $username", e)
             redirectAttributes.addFlashAttribute("errorMessage", "Error: No tienes permiso para eliminar esta imagen.")
         } catch (e: IOException) {
             logger.error("Error de E/S al eliminar imagen ID: $imagenId", e)
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar la imagen: ${e.message}")
+        } catch (e: Exception) {
+            logger.error("Error inesperado al eliminar imagen ID: $imagenId", e)
+            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al eliminar la imagen.")
         }
         return "redirect:/imagenes/historial"
     }

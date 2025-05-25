@@ -21,40 +21,33 @@ public class PageController {
         if (logout != null) {
             model.addAttribute("logoutMessage", "Has cerrado sesión exitosamente.");
         }
-        return "login"; // Devuelve login.html
+        return "login";
     }
 
-    @GetMapping("/") // Este es el mapeo principal de la página de inicio
-    public String homePage(Model model) { // Se añadió Model de nuevo, puede ser útil
+    @GetMapping("/")
+    public String homePage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Comprobar si el usuario está autenticado y no es el usuario anónimo
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             for (GrantedAuthority auth : authentication.getAuthorities()) {
                 if ("ROLE_PACIENTE".equals(auth.getAuthority())) {
-                    // Aquí puedes cargar datos específicos para el dashboard del paciente si es necesario
-                    // model.addAttribute("nombreUsuario", authentication.getName());
-                    return "dashboard-paciente"; // Nueva plantilla HTML
+                    return "redirect:/imagenes/historial"; // MODIFICADO
                 } else if ("ROLE_MEDICO".equals(auth.getAuthority())) {
-                    // model.addAttribute("nombreUsuario", authentication.getName());
-                    return "dashboard-medico"; // Nueva plantilla HTML
+                    return "dashboard-medico";
                 } else if ("ROLE_ADMIN".equals(auth.getAuthority())) {
-                    // Podrías tener un dashboard de admin también
-                    return "dashboard-admin"; // Asumiendo que tienes/tendrás dashboard-admin.html
+                    // Asumiendo que tienes/tendrás dashboard-admin.html
+                    // Si no, redirige a una página apropiada o a /login
+                    return "dashboard-admin"; // O, por ejemplo, "redirect:/admin/dashboard" si esa es la ruta
                 }
             }
-            // Si el usuario está autenticado pero no tiene un rol coincidente,
-            // o si anonymousUser de alguna manera llega aquí y no es capturado por permitAll en SecurityConfig.
-            return "redirect:/login"; // O una página de error genérica, o acceso denegado
+            // Si el rol no coincide con ninguno de los anteriores, redirigir al login
+            return "redirect:/login";
         }
-        // Si no está autenticado (p. ej., usuario anónimo accediendo a / directamente antes de que la seguridad actúe para /login)
+        // Si no está autenticado
         return "redirect:/login";
     }
 
     @GetMapping("/mostrar-registro")
     public String registrationPage() {
-        // Este es el controlador que ya tenías para mostrar la página de registro.
-        // El POST para el registro debe ser manejado por otro método,
-        // por ejemplo, en UsuarioController como vimos antes.
-        return "registro"; // Devuelve registro.html
+        return "registro";
     }
 }
