@@ -1,56 +1,56 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.1" //
-    id("io.spring.dependency-management") version "1.1.7" //
-    kotlin("jvm") //
+    id("org.springframework.boot") version "3.5.0"
+    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("jvm")
 }
 
-group = "org.sistemadegestiondelesionescutaneas" //
-version = "0.0.1-SNAPSHOT" //
+group = "org.sistemadegestiondelesionescutaneas"
+version = "0.0.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21 //
-    targetCompatibility = JavaVersion.VERSION_21 //
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
-    mavenCentral() //
+    mavenCentral()
 }
 
 dependencies {
     // Excluir Tomcat de spring-boot-starter-web
-    implementation("org.springframework.boot:spring-boot-starter-web") { //
-        exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat") //
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     // Añadir Undertow
-    implementation("org.springframework.boot:spring-boot-starter-undertow") //
+    implementation("org.springframework.boot:spring-boot-starter-undertow")
 
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf") //
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa") //
-    implementation("org.springframework.boot:spring-boot-starter-security") //
-    implementation("org.springframework.boot:spring-boot-starter-validation") //
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator") // <--- AÑADIR O VERIFICAR ESTA LÍNEA
 
-    developmentOnly("org.springframework.boot:spring-boot-devtools") //
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    runtimeOnly("com.h2database:h2") // Solo si la usas activamente, si no, puedes comentarla. //
-    implementation("com.mysql:mysql-connector-j:8.3.0") //
+    runtimeOnly("com.h2database:h2") // Solo si la usas activamente, si no, puedes comentarla.
+    implementation("com.mysql:mysql-connector-j:8.3.0")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0")) //
-    testImplementation("org.junit.jupiter:junit-jupiter") //
-    testImplementation("org.springframework.boot:spring-boot-starter-test") //
-    testImplementation("org.springframework.security:spring-security-test") //
-    implementation(kotlin("stdlib-jdk8")) //
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform() //
+    useJUnitPlatform()
 }
 
 springBoot {
-    mainClass.set("org.sistemadegestiondelesionescutaneas.SalcApplication") //
+    mainClass.set("org.sistemadegestiondelesionescutaneas.SalcApplication")
 }
 
 kotlin {
-    jvmToolchain(21) //
+    jvmToolchain(21)
 }
