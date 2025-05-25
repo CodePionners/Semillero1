@@ -1,31 +1,40 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
 import jakarta.persistence.*;
-// ... (otras importaciones para caché si las tienes)
+import jakarta.validation.constraints.Email; // Importa Jakarta Bean Validation Email
+import jakarta.validation.constraints.NotBlank; // Importa Jakarta Bean Validation NotBlank
+import jakarta.validation.constraints.Size;   // Importa Jakarta Bean Validation Size
 
 @Entity
 @Table(name = "usuarios")
-// ... (anotaciones de caché si las tienes) ...
 public class Usuario {
 
-    // ... (tus campos y constructor) ...
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
     private Long id;
 
+    @NotBlank(message = "El nombre de usuario no puede estar vacío") // Añadido
+    @Size(max = 50, message = "El nombre de usuario no puede exceder los 50 caracteres") // Añadido
     @Column(name = "usuario", unique = true, nullable = false, length = 50)
     private String usuario;
 
+    @NotBlank(message = "La contraseña no puede estar vacía") // Añadido
     @Column(name = "contrasena", nullable = false)
     private String contrasena;
 
+    @NotBlank(message = "El rol no puede estar vacío") // Añadido
     @Column(name = "rol", nullable = false, length = 20)
     private String rol;
 
+    @NotBlank(message = "El nombre completo no puede estar vacío") // Añadido
+    @Size(max = 100, message = "El nombre completo no puede exceder los 100 caracteres") // Añadido
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @NotBlank(message = "El email no puede estar vacío") // Añadido
+    @Email(message = "Debe ser una dirección de email válida") // Añadido
+    @Size(max = 100, message = "El email no puede exceder los 100 caracteres") // Añadido
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
@@ -43,7 +52,7 @@ public class Usuario {
         this.email = email;
     }
 
-    // ... (tus getters y setters) ...
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -71,8 +80,6 @@ public class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", usuario='" + usuario + '\'' +
-                // No mostrar la contraseña hasheada en logs por seguridad,
-                // pero sí confirmar si está presente y su longitud.
                 ", contrasenaPresente=" + (contrasena != null && !contrasena.isEmpty()) +
                 ", contrasenaLongitud=" + (contrasena != null ? contrasena.length() : 0) +
                 ", rol='" + rol + '\'' +
