@@ -21,10 +21,9 @@
         <p th:text="${successMessage}"></p>
     </div>
 
-    <form id="registrationForm" method="POST" th:action="@{/registro}" th:object="${usuario}">
-        <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
-            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Errores globales</p>
-        </div>
+    <form id="registrationForm" method="POST" th:action="@{/registro}" th:object="${usuarioForm}"> <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Errores globales</p>
+    </div>
 
         <div>
             <label for="nombre">Nombre Completo:</label>

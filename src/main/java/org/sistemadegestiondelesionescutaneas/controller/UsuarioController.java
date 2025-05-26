@@ -26,23 +26,23 @@ public class UsuarioController {
 
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
-        if (!model.containsAttribute("usuario")) {
-            model.addAttribute("usuario", new Usuario());
+        if (!model.containsAttribute("usuarioForm")) { // MODIFICADO: nombre del atributo
+            model.addAttribute("usuarioForm", new Usuario()); // MODIFICADO: nombre del atributo
         }
         return "registro";
     }
 
     @PostMapping("/registro")
-    public String procesarRegistro(@Valid @ModelAttribute("usuario") Usuario usuarioModel,
+    public String procesarRegistro(@Valid @ModelAttribute("usuarioForm") Usuario usuarioModel, // MODIFICADO: nombre del atributo
                                    BindingResult result,
-                                   Model model, // Añadido para devolver a la misma página con errores
+                                   Model model,
                                    RedirectAttributes redirectAttributes) {
 
         logger.info("--- INICIO PROCESAR REGISTRO ---");
         if (usuarioModel != null) {
             logger.info("Datos recibidos del formulario: Nombre Completo: '{}', Usuario: '{}', Email: '{}', Rol: '{}', Contraseña (presente): '{}'",
                     usuarioModel.getNombre(),
-                    usuarioModel.getUsuario(), // Nombre del campo en el formulario
+                    usuarioModel.getUsuario(),
                     usuarioModel.getEmail(),
                     usuarioModel.getRol(),
                     (usuarioModel.getContrasena() != null && !usuarioModel.getContrasena().isEmpty()));
@@ -66,9 +66,8 @@ public class UsuarioController {
                             error.getDefaultMessage());
                 }
             }
-            model.addAttribute("usuario", usuarioModel); // Devolver el objeto con los datos ingresados
-            // model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "usuario", result); // Opcional, Thymeleaf suele encontrarlo
-            return "registro"; // Volver a la página de registro para mostrar errores
+            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
+            return "registro";
         }
 
         try {
@@ -86,12 +85,12 @@ public class UsuarioController {
         } catch (IllegalArgumentException e) {
             logger.error("Error de argumento ilegal durante el registro (desde servicio): {}", e.getMessage(), e);
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("usuario", usuarioModel);
+            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
             return "registro";
         } catch (Exception e) {
             logger.error("Error inesperado durante el registro (desde servicio): {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ocurrió un error inesperado durante el registro.");
-            model.addAttribute("usuario", usuarioModel);
+            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
             return "registro";
         } finally {
             logger.info("--- FIN PROCESAR REGISTRO ---");
