@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Dashboard Médico</title>
+    <title>Dashboard Médico - Galería</title>
+    <meta charset="UTF-8"/>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background-color: #f0f2f5; /* Un fondo general claro */
+            background-color: #f0f2f5; /* Light grey-blue background for the page */
             color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .medico-header {
-            background-color: #0056b3; /* Azul oscuro para la barra superior de info de usuario */
-            padding: 8px 25px;
+            background-color: #0056b3; /* Dark blue for header */
+            padding: 10px 25px;
             color: white;
             display: flex;
-            justify-content: flex-end; /* Alinea el contenido a la derecha */
+            justify-content: flex-end;
             align-items: center;
             font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .medico-header .user-info strong {
@@ -25,24 +30,26 @@
         }
 
         .medico-header .logout-form button {
-            background-color: #d9534f;
+            background-color: #d9534f; /* Red for logout */
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.95em;
+            font-weight: 500;
         }
         .medico-header .logout-form button:hover {
             background-color: #c9302c;
         }
 
         .medico-main-nav {
-            background-color: #e9ecef; /* Fondo celeste claro para la barra de navegación principal */
+            background-color: #e9ecef; /* Light grey-blue for nav background */
             padding: 0 20px;
             border-bottom: 1px solid #dee2e6;
             display: flex;
-            justify-content: center; /* Centra los elementos de navegación */
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .medico-main-nav ul {
@@ -55,7 +62,7 @@
 
         .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn {
             display: block;
-            color: #0056b3; /* Texto azul oscuro para enlaces */
+            color: #0056b3; /* Dark blue for nav links */
             text-align: center;
             padding: 14px 20px;
             text-decoration: none;
@@ -64,20 +71,24 @@
             background: none;
             cursor: pointer;
             font-size: 1em;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover, .medico-main-nav ul li.active a {
-            background-color: #ced4da; /* Fondo gris claro para hover/activo */
-            color: #003875;
+        .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover,
+        .medico-main-nav ul li.active > a, .medico-main-nav ul li.active > .dropbtn { /* Apply to direct child a or .dropbtn */
+            background-color: #fff; /* White background for active/hover */
+            color: #003875; /* Slightly darker blue for text on active/hover */
+            border-top: 3px solid #0056b3;
+            border-left: 1px solid #ced4da;
+            border-right: 1px solid #ced4da;
+            position: relative;
         }
-
-        .medico-main-nav ul li.active a { /* Estilo para el elemento activo, ej. Reportes en el mockup */
-             background-color: #fff;
-             border-left: 1px solid #ccc;
-             border-right: 1px solid #ccc;
-             border-top: 2px solid #0056b3;
-             color: #0056b3;
-        }
+         .medico-main-nav ul li:not(.active) a:hover, .medico-main-nav ul li:not(.active) .dropbtn:hover {
+             background-color: #d8dde1; /* Lighter grey for non-active hover */
+             border-top: 3px solid transparent; /* Keep space for border alignment */
+             border-left: 1px solid transparent;
+             border-right: 1px solid transparent;
+         }
 
 
         .dropdown {
@@ -88,24 +99,30 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background-color: #f0f8ff; /* Fondo celeste muy claro para el dropdown, como en el mockup */
-            min-width: 200px;
+            background-color: #f0f8ff; /* Light alice blue for dropdown */
+            min-width: 220px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-            z-index: 1;
-            border: 1px solid #add8e6; /* Borde celeste */
+            z-index: 1000;
+            border: 1px solid #add8e6; /* Light blue border */
+            border-top: none;
         }
 
         .dropdown-content a {
-            color: #333; /* Texto oscuro para ítems del dropdown */
-            padding: 10px 14px;
+            color: #333;
+            padding: 10px 16px;
             text-decoration: none;
             display: block;
             text-align: left;
             font-size: 0.95em;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            background-color: transparent !important;
         }
 
         .dropdown-content a:hover {
-            background-color: #d6eaf8; /* Fondo celeste más oscuro al pasar el cursor */
+            background-color: #d6eaf8 !important;
+            color: #0056b3 !important;
         }
 
         .dropdown:hover .dropdown-content {
@@ -113,52 +130,65 @@
         }
 
         .medico-content-area {
+            flex-grow: 1;
             padding: 25px;
             max-width: 1200px;
             margin: 20px auto;
+            width: 90%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .content-title {
-            font-size: 1.6em;
-            color: #333;
-            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 25px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
+            border-bottom: 2px solid #e0e0e0;
         }
 
         .image-gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
         }
 
         .image-gallery-grid .image-item {
-            background-color: #e0e0e0; /* Gris claro para los placeholders de imagen */
-            height: 150px;
+            background-color: #eef1f5;
+            height: 180px;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #666;
-            font-size: 0.9em;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #555;
+            font-size: 1em;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             cursor: pointer;
-            transition: transform 0.2s ease-in-out;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #d8dde1;
+            text-align: center;
         }
         .image-gallery-grid .image-item:hover {
-            transform: scale(1.03);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
         }
 
-        /* Estilos para el pie de página (opcional) */
         .footer {
             text-align: center;
             padding: 20px;
-            margin-top: 30px;
             background-color: #343a40;
             color: white;
             font-size: 0.9em;
+            margin-top: auto;
         }
-
+        .placeholder-link:after {
+            content: " (Próximamente)";
+            font-size: 0.8em;
+            color: #777;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -166,7 +196,7 @@
 <header class="medico-header">
     <div class="user-info">
         <strong sec:authentication="name">Nombre del Médico</strong>
-        <form th:action="@{/logout}" method="post" class="logout-form" style="display: inline;">
+        <form th:action="@{/logout}" method="post" class="logout-form" style="display: inline; margin-left: 15px;">
             <button type="submit">Cerrar Sesión</button>
         </form>
     </div>
@@ -174,17 +204,60 @@
 
 <nav class="medico-main-nav">
     <ul>
-        <li><a th:href="@{/medico/dashboard}">Inicio</a></li> <li class="dropdown">
-        <a href="javascript:void(0)" class="dropbtn">Galería</a>
-        <div class="dropdown-content">
-            <a th:href="@{/medico/galeria/ver-imagenes}" class="placeholder-link">- Ver imagen</a>
-            <a th:href="@{/medico/imagenes/cargar-para-paciente}" class="placeholder-link">- Agregar nueva imagén</a>
-            <a th:href="@{/medico/galeria/info-general}" class="placeholder-link">- Información general</a>
-            <a th:href="@{/medico/pacientes/agregar}" class="placeholder-link">- Agregar nuevo paciente</a> </div>
-    </li>
-        <li><a th:href="@{/medico/pacientes/lista}" class="placeholder-link">Datos del paciente</a></li>
-        <li class="dropdown active"> <a href="javascript:void(0)" class="dropbtn">Reportes</a>
+        <li th:classappend="${#strings.equals(requestURI, '/medico/dashboard') or #strings.equals(requestURI, '/medico/')} ? 'active' : ''">
+            <a th:href="@{/medico/dashboard}">Inicio</a>
+        </li>
+        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/galeria') ? 'active' : ''}">
+            <a href="javascript:void(0)" class="dropbtn">Galería</a>
+            <div class="dropdown-content">
+                <a th:href="@{/medico/galeria/ver-imagenes}" class="placeholder-link">- Ver imagen</a>
+                <a th:href="@{/medico/imagenes/cargar-para-paciente}" class="placeholder-link">- Agregar nueva imagén</a>
+                <a th:href="@{/medico/galeria/info-general}" class="placeholder-link">- Información general</a>
+            </div>
+        </li>
+        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/pacientes') ? 'active' : ''}">
+            <a href="javascript:void(0)" class="dropbtn">Pacientes</a>
+            <div class="dropdown-content">
+                <a th:href="@{/medico/pacientes/lista}" class="placeholder-link">- Datos del paciente</a>
+                <a th:href="@{/medico/pacientes/agregar}" class="placeholder-link">- Agregar nuevo paciente</a>
+            </div>
+        </li>
+        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/reportes') ? 'active' : ''}">
+            <a href="javascript:void(0)" class="dropbtn">Reportes</a>
             <div class="dropdown-content">
                 <a th:href="@{/medico/reportes/generar}" class="placeholder-link">- Generar reportes</a>
                 <a th:href="@{/medico/reportes/ver-generados}" class="placeholder-link">- Reportes generados</a>
-                <a th:href="@
+            </div>
+        </li>
+        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/historial') ? 'active' : ''}">
+            <a href="javascript:void(0)" class="dropbtn">Historial</a>
+            <div class="dropdown-content">
+                <a th:href="@{/medico/historial/consultas-anteriores}" class="placeholder-link">- Ver consultas anteriores</a>
+            </div>
+        </li>
+        <li th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/estadisticas') ? 'active' : ''}">
+            <a th:href="@{/medico/estadisticas}">Estadística</a>
+        </li>
+    </ul>
+</nav>
+
+<main class="medico-content-area">
+    <h1 class="content-title">Galería Principal de Imágenes</h1>
+    <div class="image-gallery-grid">
+        <div class="image-item">Imagen 1</div>
+        <div class="image-item">Imagen 2</div>
+        <div class="image-item">Imagen 3</div>
+        <div class="image-item">Imagen 4</div>
+        <div class="image-item">Imagen 5</div>
+        <div class="image-item">Imagen 6</div>
+        <div class="image-item">Imagen 7</div>
+        <div class="image-item">Imagen 8</div>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>&copy; 2025 Sistema de Apoyo al Diagnóstico. Todos los derechos reservados.</p>
+</footer>
+
+</body>
+</html>
