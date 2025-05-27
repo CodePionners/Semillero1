@@ -76,63 +76,60 @@
 
         /* Estilos específicos para la página de reportes */
         .reportes-content-area {
-            flex-grow: 1; padding: 25px; max-width: 1000px; /* Ajustado para la imagen */
+            flex-grow: 1; padding: 25px; max-width: 1000px;
             margin: 20px auto; width: 90%; background-color: #fff;
             border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex; /* Para centrar el contenido verticalmente si es poco */
+            display: flex;
             flex-direction: column;
-            align-items: center; /* Centra horizontalmente los elementos del flex container */
-            /* justify-content: center; */ /* Descomentar si quieres centrar verticalmente también */
+            align-items: center;
         }
 
         .reportes-header-tabs {
             display: flex;
-            /* border-bottom: 2px solid #e0e0e0; */ /* El borde azul claro ya define esta área */
-            margin-bottom: 40px; /* Más espacio después de las pestañas */
+            margin-bottom: 40px;
             width: 100%;
-            background-color: #e0f0ff; /* Fondo azul claro para la barra de pestañas */
-            padding: 10px 0; /* Padding vertical para la barra */
-            justify-content: center; /* Centra las pestañas */
-            border-radius: 8px 8px 0 0; /* Redondear esquinas superiores si es el primer elemento */
+            background-color: #e0f0ff;
+            padding: 10px 0;
+            justify-content: center;
+            border-radius: 8px 8px 0 0;
         }
 
         .reportes-header-tabs .tab-button {
             padding: 12px 25px;
             font-size: 1.1em;
-            color: #0056b3; /* Texto azul */
+            color: #0056b3;
             text-decoration: none;
-            background-color: #fff; /* Fondo blanco para los botones */
-            border: 1px solid #b8d7f7; /* Borde azul claro */
+            background-color: #fff;
+            border: 1px solid #b8d7f7;
             border-radius: 6px;
-            margin: 0 10px; /* Espacio entre botones */
+            margin: 0 10px;
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
         }
 
         .reportes-header-tabs .tab-button.active {
-            background-color: #0056b3; /* Azul oscuro para el activo */
-            color: #fff; /* Texto blanco para el activo */
+            background-color: #0056b3;
+            color: #fff;
             border-color: #004080;
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         .reportes-header-tabs .tab-button:not(.active):hover {
-            background-color: #f0f8ff; /* Azul muy claro al pasar el mouse */
+            background-color: #f0f8ff;
             border-color: #0056b3;
         }
 
         .reporte-diagnostico-box {
-            background-color: #e0f0ff; /* Fondo azul claro como en la imagen */
-            color: #003875; /* Texto azul oscuro */
-            padding: 30px 60px; /* Más padding para hacerlo más grande */
+            background-color: #e0f0ff;
+            color: #003875;
+            padding: 30px 60px;
             border-radius: 8px;
             text-align: center;
-            font-size: 1.3em; /* Tamaño de fuente más grande */
+            font-size: 1.3em;
             font-weight: 500;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 20px; /* Espacio arriba del box */
-            /* width: auto; */ /* Se ajustará al contenido */
-            display: inline-block; /* Para que el box no ocupe todo el ancho */
+            margin-top: 20px;
+            display: inline-block;
         }
 
     </style>
@@ -151,50 +148,65 @@
     <div class="reporte-diagnostico-box">
         Reporte de diagnóstico
     </div>
-
 </main>
 
 <footer class="footer" th:insert="~{dashboard-medico :: .footer}"></footer>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-        // Script de navegación (copiar el último script corregido de dashboard-medico.html)
         document.addEventListener('DOMContentLoaded', function() {
-            var currentPath = /*[[${#request != null ? #request.requestURI : ''}]]*/ window.location.pathname;
+            var currentPath = /*[[${requestURI}]]*/ null; // Prioriza el requestURI del modelo
+            if (currentPath === null || typeof currentPath === 'undefined' || currentPath === '') { // Fallback robusto
+                currentPath = window.location.pathname;
+            }
+
             var navItems = document.querySelectorAll('.medico-main-nav ul li');
             var activeItemSet = false;
 
             navItems.forEach(function(li) { li.classList.remove('active'); });
 
             navItems.forEach(function(li) {
-                if (activeItemSet) return;
+                if (activeItemSet) return; // Si ya se marcó una activa, no procesar más
+
                 var directLink = li.querySelector('a:not(.dropbtn)');
                 var dropdownButton = li.querySelector('a.dropbtn');
 
-                if (directLink) {
+                if (directLink) { // Para enlaces directos como "Inicio", "Estadística"
                     var linkHref = directLink.getAttribute('href');
-                    if (linkHref) {
-                        if ((currentPath === '/medico/dashboard' || currentPath === '/medico/') && linkHref.endsWith('/medico/dashboard')) {
-                            li.classList.add('active'); activeItemSet = true;
-                        } else if (currentPath === linkHref && linkHref.endsWith('/medico/estadisticas')) {
-                            li.classList.add('active'); activeItemSet = true;
+                    if (linkHref && (linkHref === currentPath || currentPath.endsWith(linkHref))) {
+                        // Condición más específica para Inicio, para evitar que active en subrutas
+                        if ((linkHref.endsWith('/medico/dashboard') || linkHref.endsWith('/medico/')) && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
+                            li.classList.add('active');
+                            activeItemSet = true;
+                        } else if (linkHref === currentPath && !(linkHref.endsWith('/medico/dashboard') || linkHref.endsWith('/medico/'))) {
+                            // Para otros enlaces directos como Estadística
+                            li.classList.add('active');
+                            activeItemSet = true;
                         }
                     }
-                } else if (dropdownButton) {
+                } else if (dropdownButton) { // Para menús desplegables como "Galería", "Pacientes", "Reportes", "Historial"
                     var parentCategoryPath = null;
                     var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+
                     if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
                     else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
-                    else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes'; /* ESTE ES EL IMPORTANTE */
+                    else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes'; // Clave para Reportes
                     else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
 
                     if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
-                        li.classList.add('active'); activeItemSet = true;
+                        li.classList.add('active');
+                        activeItemSet = true;
                     }
                 }
             });
+
+            // Caso especial para el dashboard por defecto si ningún otro ítem está activo
+            // y estamos efectivamente en la URL del dashboard (ej. /medico/ o /medico/dashboard)
             if (!activeItemSet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
                 var homeLiAnchor = document.querySelector('.medico-main-nav ul li a[href$="/medico/dashboard"]');
+                if (!homeLiAnchor) {
+                     homeLiAnchor = document.querySelector('.medico-main-nav ul li a[href$="/medico/"]');
+                 }
                 if (homeLiAnchor && homeLiAnchor.parentElement) {
                     homeLiAnchor.parentElement.classList.add('active');
                 }
