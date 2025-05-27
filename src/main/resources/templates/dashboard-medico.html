@@ -204,10 +204,10 @@
 
 <nav class="medico-main-nav">
     <ul>
-        <li th:classappend="${#strings.equals(requestURI, '/medico/dashboard') or #strings.equals(requestURI, '/medico/')} ? 'active' : ''">
+        <li>
             <a th:href="@{/medico/dashboard}">Inicio</a>
         </li>
-        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/galeria') ? 'active' : ''}">
+        <li class="dropdown">
             <a href="javascript:void(0)" class="dropbtn">Galería</a>
             <div class="dropdown-content">
                 <a th:href="@{/medico/galeria/ver-imagenes}" class="placeholder-link">- Ver imagen</a>
@@ -215,27 +215,25 @@
                 <a th:href="@{/medico/galeria/info-general}" class="placeholder-link">- Información general</a>
             </div>
         </li>
-        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/pacientes') ? 'active' : ''}">
-            <a href="javascript:void(0)" class="dropbtn">Pacientes</a>
+        <li class="dropdown">
+        <a th:href="@{/medico/pacientes/lista}"class="dropbtn">Pacientes</a>
             <div class="dropdown-content">
-                <a th:href="@{/medico/pacientes/lista}" class="placeholder-link">- Datos del paciente</a>
-                <a th:href="@{/medico/pacientes/agregar}" class="placeholder-link">- Agregar nuevo paciente</a>
             </div>
         </li>
-        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/reportes') ? 'active' : ''}">
+        <li class="dropdown">
             <a href="javascript:void(0)" class="dropbtn">Reportes</a>
             <div class="dropdown-content">
                 <a th:href="@{/medico/reportes/generar}" class="placeholder-link">- Generar reportes</a>
                 <a th:href="@{/medico/reportes/ver-generados}" class="placeholder-link">- Reportes generados</a>
             </div>
         </li>
-        <li class="dropdown" th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/historial') ? 'active' : ''}">
+        <li class="dropdown">
             <a href="javascript:void(0)" class="dropbtn">Historial</a>
             <div class="dropdown-content">
                 <a th:href="@{/medico/historial/consultas-anteriores}" class="placeholder-link">- Ver consultas anteriores</a>
             </div>
         </li>
-        <li th:classappend="${requestURI != null and #strings.startsWith(requestURI, '/medico/estadisticas') ? 'active' : ''}">
+        <li>
             <a th:href="@{/medico/estadisticas}">Estadística</a>
         </li>
     </ul>
@@ -258,6 +256,58 @@
 <footer class="footer">
     <p>&copy; 2025 Sistema de Apoyo al Diagnóstico. Todos los derechos reservados.</p>
 </footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        // Script para activar el enlace de navegación correcto
+        document.addEventListener('DOMContentLoaded', function() {
+            var currentPath = /*[[${requestURI}]]*/ null; // Fetched from model attribute
+            if (!currentPath) {
+                // Fallback if requestURI is not set (e.g. direct access to static HTML for testing)
+                 currentPath = window.location.pathname;
+            }
+
+            var navLinks = document.querySelectorAll('.medico-main-nav ul li');
+            navLinks.forEach(function(li) {
+                li.classList.remove('active'); // Remove active from all first
+                var anchor = li.querySelector('a:not(.dropbtn)'); // Direct link
+                var dropdownButton = li.querySelector('a.dropbtn'); // Dropdown button
+
+                if (dropdownButton) { // This is a dropdown item
+                    var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+                    if (currentPath) {
+                        if (dropdownText === 'Galería' && currentPath.startsWith('/medico/galeria')) {
+                            li.classList.add('active');
+                        } else if (dropdownText === 'Pacientes' && currentPath.startsWith('/medico/pacientes')) {
+                            li.classList.add('active');
+                        } else if (dropdownText === 'Reportes' && currentPath.startsWith('/medico/reportes')) {
+                            li.classList.add('active');
+                        } else if (dropdownText === 'Historial' && currentPath.startsWith('/medico/historial')) {
+                            li.classList.add('active');
+                        }
+                    }
+                } else if (anchor) { // This is a direct link item
+                    var linkPath = anchor.getAttribute('href');
+                    // Check if the currentPath exactly matches or ends with the link's path
+                    // (Thymeleaf @{...} might generate context path, so ending check is safer)
+                    if (linkPath && currentPath && (currentPath === linkPath || currentPath.endsWith(linkPath))) {
+                         li.classList.add('active');
+                    }
+                }
+            });
+
+            // Special case for default dashboard if no other active items were found
+            // and current path is /medico/dashboard or /medico/
+            var isActiveSet = document.querySelector('.medico-main-nav ul li.active');
+            if (!isActiveSet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
+                var homeLink = document.querySelector('.medico-main-nav ul li a[href$="/medico/dashboard"]');
+                if (homeLink && homeLink.parentElement) {
+                    homeLink.parentElement.classList.add('active');
+                }
+            }
+        });
+    /*]]>*/
+</script>
 
 </body>
 </html>

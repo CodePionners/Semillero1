@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Dashboard Médico - Generar Reporte</title>
+    <meta charset="UTF-8"/>
+    <style>
+        /* Estilos comunes del dashboard del médico (copiados de dashboard-medico.html) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .medico-header {
+            background-color: #0056b3; padding: 10px 25px; color: white;
+            display: flex; justify-content: flex-end; align-items: center;
+            font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .medico-header .user-info strong { margin-right: 15px; }
+        .medico-header .logout-form button {
+            background-color: #d9534f; color: white; border: none;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer;
+            font-size: 0.95em; font-weight: 500;
+        }
+        .medico-header .logout-form button:hover { background-color: #c9302c; }
+        .medico-main-nav {
+            background-color: #e9ecef; padding: 0 20px;
+            border-bottom: 1px solid #dee2e6; display: flex;
+            justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .medico-main-nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; }
+        .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn {
+            display: block; color: #0056b3; text-align: center;
+            padding: 14px 20px; text-decoration: none; font-weight: 500;
+            border: none; background: none; cursor: pointer; font-size: 1em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover,
+        .medico-main-nav ul li.active > a, .medico-main-nav ul li.active > .dropbtn {
+            background-color: #fff; color: #003875;
+            border-top: 3px solid #0056b3;
+            border-left: 1px solid #ced4da;
+            border-right: 1px solid #ced4da;
+            position: relative;
+        }
+        .medico-main-nav ul li:not(.active) a:hover, .medico-main-nav ul li:not(.active) .dropbtn:hover {
+             background-color: #d8dde1;
+             border-top: 3px solid transparent;
+             border-left: 1px solid transparent;
+             border-right: 1px solid transparent;
+         }
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none; position: absolute; background-color: #f0f8ff;
+            min-width: 220px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            z-index: 1000; border: 1px solid #add8e6; border-top: none;
+        }
+        .dropdown-content a {
+            color: #333; padding: 10px 16px; text-decoration: none;
+            display: block; text-align: left; font-size: 0.95em;
+            border-top: none !important; border-left: none !important;
+            border-right: none !important; background-color: transparent !important;
+        }
+        .dropdown-content a:hover { background-color: #d6eaf8 !important; color: #0056b3 !important; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .footer {
+            text-align: center; padding: 20px; background-color: #343a40;
+            color: white; font-size: 0.9em; margin-top: auto;
+        }
+        .placeholder-link:after {
+            content: " (Próximamente)"; font-size: 0.8em; color: #777; margin-left: 4px;
+        }
+
+        /* Estilos específicos para la página de reportes */
+        .reportes-content-area {
+            flex-grow: 1; padding: 25px; max-width: 1000px; /* Ajustado para la imagen */
+            margin: 20px auto; width: 90%; background-color: #fff;
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex; /* Para centrar el contenido verticalmente si es poco */
+            flex-direction: column;
+            align-items: center; /* Centra horizontalmente los elementos del flex container */
+            /* justify-content: center; */ /* Descomentar si quieres centrar verticalmente también */
+        }
+
+        .reportes-header-tabs {
+            display: flex;
+            /* border-bottom: 2px solid #e0e0e0; */ /* El borde azul claro ya define esta área */
+            margin-bottom: 40px; /* Más espacio después de las pestañas */
+            width: 100%;
+            background-color: #e0f0ff; /* Fondo azul claro para la barra de pestañas */
+            padding: 10px 0; /* Padding vertical para la barra */
+            justify-content: center; /* Centra las pestañas */
+            border-radius: 8px 8px 0 0; /* Redondear esquinas superiores si es el primer elemento */
+        }
+
+        .reportes-header-tabs .tab-button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            color: #0056b3; /* Texto azul */
+            text-decoration: none;
+            background-color: #fff; /* Fondo blanco para los botones */
+            border: 1px solid #b8d7f7; /* Borde azul claro */
+            border-radius: 6px;
+            margin: 0 10px; /* Espacio entre botones */
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+
+        .reportes-header-tabs .tab-button.active {
+            background-color: #0056b3; /* Azul oscuro para el activo */
+            color: #fff; /* Texto blanco para el activo */
+            border-color: #004080;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .reportes-header-tabs .tab-button:not(.active):hover {
+            background-color: #f0f8ff; /* Azul muy claro al pasar el mouse */
+            border-color: #0056b3;
+        }
+
+        .reporte-diagnostico-box {
+            background-color: #e0f0ff; /* Fondo azul claro como en la imagen */
+            color: #003875; /* Texto azul oscuro */
+            padding: 30px 60px; /* Más padding para hacerlo más grande */
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3em; /* Tamaño de fuente más grande */
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px; /* Espacio arriba del box */
+            /* width: auto; */ /* Se ajustará al contenido */
+            display: inline-block; /* Para que el box no ocupe todo el ancho */
+        }
+
+    </style>
+</head>
+<body>
+
+<header class="medico-header" th:insert="~{dashboard-medico :: .medico-header}"></header>
+<nav class="medico-main-nav" th:insert="~{dashboard-medico :: .medico-main-nav}"></nav>
+
+<main class="reportes-content-area">
+    <div class="reportes-header-tabs">
+        <a th:href="@{/medico/reportes/generar}" class="tab-button active">Reportes</a>
+        <a th:href="@{/medico/reportes/ver-generados}" class="tab-button placeholder-link">Visualiza los reportes</a>
+    </div>
+
+    <div class="reporte-diagnostico-box">
+        Reporte de diagnóstico
+    </div>
+
+</main>
+
+<footer class="footer" th:insert="~{dashboard-medico :: .footer}"></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        // Script de navegación (copiar el último script corregido de dashboard-medico.html)
+        document.addEventListener('DOMContentLoaded', function() {
+            var currentPath = /*[[${#request != null ? #request.requestURI : ''}]]*/ window.location.pathname;
+            var navItems = document.querySelectorAll('.medico-main-nav ul li');
+            var activeItemSet = false;
+
+            navItems.forEach(function(li) { li.classList.remove('active'); });
+
+            navItems.forEach(function(li) {
+                if (activeItemSet) return;
+                var directLink = li.querySelector('a:not(.dropbtn)');
+                var dropdownButton = li.querySelector('a.dropbtn');
+
+                if (directLink) {
+                    var linkHref = directLink.getAttribute('href');
+                    if (linkHref) {
+                        if ((currentPath === '/medico/dashboard' || currentPath === '/medico/') && linkHref.endsWith('/medico/dashboard')) {
+                            li.classList.add('active'); activeItemSet = true;
+                        } else if (currentPath === linkHref && linkHref.endsWith('/medico/estadisticas')) {
+                            li.classList.add('active'); activeItemSet = true;
+                        }
+                    }
+                } else if (dropdownButton) {
+                    var parentCategoryPath = null;
+                    var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+                    if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
+                    else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
+                    else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes'; /* ESTE ES EL IMPORTANTE */
+                    else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
+
+                    if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
+                        li.classList.add('active'); activeItemSet = true;
+                    }
+                }
+            });
+            if (!activeItemSet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
+                var homeLiAnchor = document.querySelector('.medico-main-nav ul li a[href$="/medico/dashboard"]');
+                if (homeLiAnchor && homeLiAnchor.parentElement) {
+                    homeLiAnchor.parentElement.classList.add('active');
+                }
+            }
+        });
+    /*]]>*/
+</script>
+
+</body>
+</html>
