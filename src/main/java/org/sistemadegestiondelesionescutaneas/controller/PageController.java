@@ -53,7 +53,7 @@ public class PageController {
                     return "forward:/medico/dashboard";
                 } else if ("ROLE_ADMIN".equals(role)) {
                     logger.info("User '{}' is ROLE_ADMIN, returning 'dashboard-admin' view. Consider forwarding to an admin controller.", username);
-                    return "dashboard-admin";
+                    return "dashboard-admin"; // Consider forwarding to an admin controller if you have one
                 }
             }
             logger.warn("User '{}' authenticated but has an unhandled role. Redirecting to /login.", username);
@@ -125,20 +125,22 @@ public class PageController {
             return "forward:/medico/dashboard";
         }
 
-        @GetMapping("/medico/reportes/generar")
+        @GetMapping("/medico/reportes/generar") // Este es el enlace del submenú
         public String medicoReportesGenerar(Model model, HttpServletRequest request) {
             String uri = request.getRequestURI();
+            medicoLogger.info("Accessing Medico Reportes Generar ({}).", uri); // Log para depuración
             model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
+            return "medico-reportes-generar"; // Nombre del nuevo archivo HTML
         }
 
         @GetMapping("/medico/reportes/ver-generados")
-        public String medicoReportesVer(Model model, HttpServletRequest request) {
+        public String medicoReportesVer (Model model, HttpServletRequest request){
             String uri = request.getRequestURI();
+            medicoLogger.info("Accessing Medico Reportes Ver ({}). Placeholder.", uri);
             model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
+            // Cuando implementes esta vista, cambia el return:
+            // return "medico-reportes-lista";
+            return "forward:/medico/reportes/generar"; // Temporalmente reenvía o implementa la vista
         }
 
         @GetMapping("/medico/historial/consultas-anteriores")
@@ -147,33 +149,6 @@ public class PageController {
             model.addAttribute("requestURI", uri);
             medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
             return "forward:/medico/dashboard";
-
-
-        }
-    }
-
-    @Controller
-    public static class MedicoController {
-        private static final Logger medicoLogger = LoggerFactory.getLogger(MedicoController.class);
-
-
-        @GetMapping("/medico/reportes/generar") // Este es el enlace del submenú
-        public String medicoReportesGenerar(Model model, HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            medicoLogger.info("Accessing Medico Reportes Generar ({}).", uri); // Log para depuración
-            model.addAttribute("requestURI", uri);
-            return "medico-reportes-generar"; // Nombre del nuevo archivo HTML
-
-
-            @GetMapping("/medico/reportes/ver-generados")
-            public String medicoReportesVer (Model model, HttpServletRequest request){
-                String uri = request.getRequestURI();
-                medicoLogger.info("Accessing Medico Reportes Ver ({}). Placeholder.", uri);
-                model.addAttribute("requestURI", uri);
-                // Cuando implementes esta vista, cambia el return:
-                // return "medico-reportes-lista";
-                return "forward:/medico/reportes/generar"; // Temporalmente reenvía o implementa la vista
-            }
         }
     }
 }
