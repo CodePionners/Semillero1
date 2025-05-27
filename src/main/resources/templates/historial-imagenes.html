@@ -1,22 +1,154 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Dashboard Paciente</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <style>
-        /* Estilos adicionales si son necesarios para la tabla o mensajes */
-        .success-message { color: green; }
-        .error-message { color: red; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        img { display: block; max-width: 100px; height: auto; }
-    </style>
+    <title>Mi Panel de Paciente</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"> <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6; /* Mismo fondo que el dashboard del médico */
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    .navbar {
+        background-color: #0056b3; /* Mismo color que la navbar del médico */
+        padding: 10px 20px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .navbar h1 {
+        margin: 0;
+        font-size: 1.5em;
+    }
+    .navbar .user-info {
+        font-size: 0.9em;
+    }
+    .navbar .logout-form button {
+        background-color: #d9534f; /* Mismo color de botón de logout que el médico */
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .navbar .logout-form button:hover {
+        background-color: #c9302c;
+    }
+
+    .container-paciente { /* Renombrado para evitar colisión si se usa 'container' globalmente */
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 25px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .page-header h2 {
+        font-size: 1.8em;
+        color: #0056b3; /* Mismo color de encabezado que el médico */
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+    .page-header p {
+        font-size: 1.1em;
+        color: #555;
+        margin-bottom: 25px;
+    }
+
+    .dashboard-section {
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    .dashboard-section:last-child {
+        border-bottom: none;
+    }
+
+    .actions-list {
+        list-style-type: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    .actions-list li {
+        margin-bottom: 12px;
+    }
+    .actions-list li a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+        font-size: 1.1em;
+        padding: 8px 0;
+        display: inline-block;
+    }
+    .actions-list li a:hover {
+        text-decoration: underline;
+    }
+
+    .success-message { color: green; background-color: #e6ffed; border: 1px solid #b7ebc9; padding: 10px; border-radius: 4px; margin-bottom:15px; }
+    .error-message { color: red; background-color: #ffebeb; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom:15px;}
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03); /* Sombra sutil para la tabla */
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: 600;
+        color: #333; /* Color de texto de encabezado de tabla consistente */
+    }
+    img.thumbnail {
+        display: block;
+        max-width: 80px;
+        height: auto;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+    .placeholder-link {
+        color: #007bff !important;
+    }
+     .placeholder-link:after {
+        content: " (Próximamente)";
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-left: 5px;
+    }
+    .no-images-message {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        text-align: center;
+        color: #495057;
+    }
+</style>
 </head>
 <body>
-<div class="container">
-    <h2>Bienvenido Paciente, <span th:text="${#authentication.name}">Usuario</span>!</h2>
-    <p>Este es tu panel de control donde puedes cargar nuevas imágenes y ver tu historial.</p>
+<div class="navbar">
+    <h1>MI PANEL</h1> <div class="user-info">
+    <span><strong sec:authentication="name">Usuario</strong></span>
+    <form th:action="@{/logout}" method="post" style="display: inline; margin-left: 15px;" class="logout-form">
+        <button type="submit">Cerrar Sesión</button>
+    </form>
+</div>
+</div>
+
+<div class="container-paciente"> <div class="page-header">
+    <h2>Bienvenido, <span sec:authentication="name">Usuario</span>!</h2>
+    <p>Consulta tu historial de imágenes y accede a tus reportes.</p>
+</div>
 
     <div th:if="${successMessage}" class="success-message">
         <p th:text="${successMessage}"></p>
@@ -25,60 +157,54 @@
         <p th:text="${errorMessage}"></p>
     </div>
 
-    <h3>Cargar Nueva Imagen de Lesión</h3>
-    <div th:if="${param.successUploadMessage}" class="success-message">
-        <p th:text="${param.successUploadMessage[0]}"></p>
-    </div>
-    <div th:if="${param.errorUploadMessage}" class="error-message">
-        <p th:text="${param.errorUploadMessage[0]}"></p>
-    </div>
-    <form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
-        <div>
-            <label for="file">Seleccionar imagen:</label>
-            <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required />
-        </div>
-        <div>
-            <button type="submit">Cargar Imagen</button>
-        </div>
-    </form>
-    <hr/>
-
-    <h3>Historial de Imágenes Cargadas</h3>
-    <div th:if="${not #lists.isEmpty(imagenes)}">
-        <table>
-            <thead>
-            <tr>
-                <th>Miniatura</th>
-                <th>Nombre de Archivo</th>
-                <th>Fecha de Subida</th>
-                <th>Acciones</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="imagen : ${imagenes}">
-                <td>
-                    <a th:href="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}" target="_blank">
-                        <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}" alt="Miniatura"/>
-                    </a>
-                </td>
-                <td th:text="${imagen.rutaArchivo}">Nombre Archivo</td>
-                <td th:text="${imagen.fechaSubida != null ? #temporals.format(imagen.fechaSubida, 'dd-MM-yyyy HH:mm') : 'N/A'}">Fecha Subida</td>
-                <td>
-                    <form th:action="@{/imagenes/delete/{imagenId}(imagenId=${imagen.id})}" method="post" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta imagen?');">
-                        <button type="submit">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div th:if="${#lists.isEmpty(imagenes)}">
-        <p>No has cargado ninguna imagen todavía.</p>
+    <div class="dashboard-section">
+        <h4>Acciones:</h4>
+        <ul class="actions-list">
+            <li><a th:href="@{/paciente/reportes/generar}" class="placeholder-link">Generar Mis Reportes</a></li>
+            <li><a th:href="@{/paciente/diagnosticos/ver}" class="placeholder-link">Ver Mis Diagnósticos</a></li>
+        </ul>
     </div>
 
-    <form th:action="@{/logout}" method="post" style="margin-top: 20px;">
-        <button type="submit">Cerrar Sesión</button>
-    </form>
+    <div class="dashboard-section">
+        <h3 id="historial-seccion">Mi Historial de Imágenes</h3>
+        <div th:if="${not #lists.isEmpty(imagenes)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Miniatura</th>
+                    <th>Nombre de Archivo</th>
+                    <th>Fecha de Subida</th>
+                    <th>Estado del Análisis</th>
+                    <th>Detalles</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="imagen : ${imagenes}">
+                    <td>
+                        <a th:href="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}" target="_blank" title="Ver imagen completa">
+                            <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}" alt="Miniatura de lesión" class="thumbnail"/>
+                        </a>
+                    </td>
+                    <td th:text="${imagen.rutaArchivo}">Nombre_Archivo.jpg</td>
+                    <td th:text="${imagen.fechaSubida != null ? #temporals.format(imagen.fechaSubida, 'dd MMM yy, HH:mm') : 'Fecha no disponible'}">01 Ene 24, 10:30</td>
+                    <td th:text="${imagen.analisisDermatologico != null && imagen.analisisDermatologico.diagnostico != null ? imagen.analisisDermatologico.diagnostico.descripcion : 'Pendiente de Análisis'}">Benigna</td>
+                    <td>
+                        <a th:if="${imagen.analisisDermatologico != null}"
+                           th:href="@{/paciente/analisis/detalles/{analisisId}(analisisId=${imagen.analisisDermatologico.id})}"
+                           class="placeholder-link">
+                            Ver Detalles
+                        </a>
+                        <span th:if="${imagen.analisisDermatologico == null}" style="color: #777;">No disponible</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${#lists.isEmpty(imagenes)}" class="no-images-message">
+            <p>Aún no tienes imágenes en tu historial.</p>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>

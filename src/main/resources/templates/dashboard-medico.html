@@ -1,16 +1,190 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Dashboard Médico</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5; /* Un fondo general claro */
+            color: #333;
+        }
+
+        .medico-header {
+            background-color: #0056b3; /* Azul oscuro para la barra superior de info de usuario */
+            padding: 8px 25px;
+            color: white;
+            display: flex;
+            justify-content: flex-end; /* Alinea el contenido a la derecha */
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .medico-header .user-info strong {
+            margin-right: 15px;
+        }
+
+        .medico-header .logout-form button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .medico-header .logout-form button:hover {
+            background-color: #c9302c;
+        }
+
+        .medico-main-nav {
+            background-color: #e9ecef; /* Fondo celeste claro para la barra de navegación principal */
+            padding: 0 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: center; /* Centra los elementos de navegación */
+        }
+
+        .medico-main-nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn {
+            display: block;
+            color: #0056b3; /* Texto azul oscuro para enlaces */
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover, .medico-main-nav ul li.active a {
+            background-color: #ced4da; /* Fondo gris claro para hover/activo */
+            color: #003875;
+        }
+
+        .medico-main-nav ul li.active a { /* Estilo para el elemento activo, ej. Reportes en el mockup */
+             background-color: #fff;
+             border-left: 1px solid #ccc;
+             border-right: 1px solid #ccc;
+             border-top: 2px solid #0056b3;
+             color: #0056b3;
+        }
+
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f0f8ff; /* Fondo celeste muy claro para el dropdown, como en el mockup */
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            z-index: 1;
+            border: 1px solid #add8e6; /* Borde celeste */
+        }
+
+        .dropdown-content a {
+            color: #333; /* Texto oscuro para ítems del dropdown */
+            padding: 10px 14px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #d6eaf8; /* Fondo celeste más oscuro al pasar el cursor */
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .medico-content-area {
+            padding: 25px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .content-title {
+            font-size: 1.6em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .image-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .image-gallery-grid .image-item {
+            background-color: #e0e0e0; /* Gris claro para los placeholders de imagen */
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            font-size: 0.9em;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .image-gallery-grid .image-item:hover {
+            transform: scale(1.03);
+        }
+
+        /* Estilos para el pie de página (opcional) */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            background-color: #343a40;
+            color: white;
+            font-size: 0.9em;
+        }
+
+    </style>
 </head>
 <body>
-<div class="container">
-    <h2>Bienvenido Médico, <span th:text="${#authentication.name}">Usuario</span>!</h2>
-    <p>Este es tu panel de control.</p>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Cerrar Sesión</button>
-    </form>
-</div>
-</body>
-</html>
+
+<header class="medico-header">
+    <div class="user-info">
+        <strong sec:authentication="name">Nombre del Médico</strong>
+        <form th:action="@{/logout}" method="post" class="logout-form" style="display: inline;">
+            <button type="submit">Cerrar Sesión</button>
+        </form>
+    </div>
+</header>
+
+<nav class="medico-main-nav">
+    <ul>
+        <li><a th:href="@{/medico/dashboard}">Inicio</a></li> <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">Galería</a>
+        <div class="dropdown-content">
+            <a th:href="@{/medico/galeria/ver-imagenes}" class="placeholder-link">- Ver imagen</a>
+            <a th:href="@{/medico/imagenes/cargar-para-paciente}" class="placeholder-link">- Agregar nueva imagén</a>
+            <a th:href="@{/medico/galeria/info-general}" class="placeholder-link">- Información general</a>
+            <a th:href="@{/medico/pacientes/agregar}" class="placeholder-link">- Agregar nuevo paciente</a> </div>
+    </li>
+        <li><a th:href="@{/medico/pacientes/lista}" class="placeholder-link">Datos del paciente</a></li>
+        <li class="dropdown active"> <a href="javascript:void(0)" class="dropbtn">Reportes</a>
+            <div class="dropdown-content">
+                <a th:href="@{/medico/reportes/generar}" class="placeholder-link">- Generar reportes</a>
+                <a th:href="@{/medico/reportes/ver-generados}" class="placeholder-link">- Reportes generados</a>
+                <a th:href="@
