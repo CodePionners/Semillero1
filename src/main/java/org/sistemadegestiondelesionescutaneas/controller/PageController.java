@@ -139,7 +139,7 @@ public class PageController {
             medicoLogger.info("Accessing Medico Reportes Ver ({}). Placeholder.", uri);
             model.addAttribute("requestURI", uri);
             // Cuando implementes esta vista, cambia el return:
-            // return "medico-reportes-lista";
+            //return "medico-reportes-lista"; //MODIFICADO
             return "forward:/medico/reportes/generar"; // Temporalmente reenvía o implementa la vista
         }
 
