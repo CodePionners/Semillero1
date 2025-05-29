@@ -73,31 +73,55 @@
             padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;
         }
         .image-gallery-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Para 3 columnas fijas */
+            gap: 20px;
         }
         .image-gallery-grid .image-item {
-            background-color: #eef1f5; /* Fallback background, will be covered by image */
+            background-color: #eef1f5;
             height: 180px;
-            display: block; /* Changed from flex for the <a> tag */
+            display: block; /* Para el tag <a> que contiene la imagen */
             color: #555;
             border-radius: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             border: 1px solid #d8dde1;
-            overflow: hidden; /* Important to contain the image */
-            text-decoration: none; /* Remove underline from link */
+            overflow: hidden;
+            text-decoration: none;
+            position: relative; /* Para el texto superpuesto si se usa */
         }
-        .image-gallery-grid .image-item:hover {
+         .image-gallery-grid .image-item:not(.placeholder-item):hover { /* Aplicar hover solo si NO es un placeholder */
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+            cursor: pointer;
         }
         .image-gallery-grid .image-item img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures the image covers the item area, cropping if necessary */
-            display: block; /* Remove extra space below image */
+            object-fit: cover;
+            display: block;
         }
+
+        /* NUEVOS ESTILOS PARA LOS PLACEHOLDERS */
+        .image-gallery-grid .placeholder-item {
+            /* Hereda altura, borde, sombra de .image-item */
+            background-color: #e9ecef; /* Gris claro para el fondo del placeholder */
+            display: flex; /* Para centrar el texto dentro del placeholder */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #6c757d; /* Color del texto del placeholder */
+            font-size: 1em;
+            cursor: default; /* Para indicar que no es interactivo como una imagen real */
+        }
+        .image-gallery-grid .placeholder-item:hover {
+            transform: none; /* No aplicar efecto de elevación a los placeholders */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Mantener la sombra base */
+        }
+        .placeholder-text {
+            /* El texto se centra por flexbox en .placeholder-item */
+        }
+
+        /* Mensaje por si se decide no mostrar placeholders y volver al mensaje original */
         .no-images-message {
             text-align: center;
             font-size: 1.1em;
@@ -112,7 +136,7 @@
             color: white; font-size: 0.9em; margin-top: auto;
         }
         .placeholder-link:after {
-            content: " (Próximamente)"; font-size: 0.8em; color: #777; margin-left: 4px;
+            content: ""; font-size: 0.8em; color: #777; margin-left: 4px;
         }
     </style>
 </head>
@@ -124,20 +148,26 @@
 <main class="medico-content-area">
     <h1 class="content-title">Galería Principal de Imágenes</h1>
 
-    <div th:if="${imagenesPrincipales != null and not #lists.isEmpty(imagenesPrincipales)}" class="image-gallery-grid">
-        <a th:each="imagen : ${imagenesPrincipales}"
-           th:href="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
-           target="_blank"
-           class="image-item"
-           th:title="${'Ver imagen completa: ' + imagen.rutaArchivo}">
-            <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
-                 th:alt="${'Imagen ID ' + imagen.id}"/>
-        </a>
+    <div class="image-gallery-grid">
+        <th:block th:if="${imagenesPrincipales != null and not #lists.isEmpty(imagenesPrincipales)}">
+            <a th:each="imagen : ${imagenesPrincipales}"
+               th:href="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
+               target="_blank"
+               class="image-item"
+               th:title="${'Ver imagen completa: ' + imagen.rutaArchivo}">
+                <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
+                     th:alt="${'Imagen ID ' + imagen.id}"/>
+            </a>
+        </th:block>
+
+        <th:block th:if="${imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)}">
+            <th:block th:each="i : ${#numbers.sequence(1, 6)}">
+                <div class="image-item placeholder-item"> <span class="placeholder-text" th:text="'Imagen ' + ${i}">Imagen X</span>
+                </div>
+            </th:block>
+        </th:block>
     </div>
 
-    <div th:if="${imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)}" class="no-images-message">
-        <p>No hay imágenes para mostrar en la galería principal.</p>
-    </div>
 </main>
 
 <footer class="footer" th:replace="~{dashboard-medico :: footer}"></footer>
@@ -168,7 +198,6 @@
                     if (isActiveInDropdown) {
                          li.classList.add('active');
                     } else {
-                         // Ensure parent dropdown 'Galería' is active if on any gallery subpage not explicitly listed
                          if (dropdownText === 'Galería' && currentPath.startsWith('/medico/galeria')) {
                             li.classList.add('active');
                          } else if (dropdownText === 'Pacientes' && currentPath.startsWith('/medico/pacientes')) {
@@ -187,7 +216,6 @@
                 }
             });
 
-            // Fallback: if no specific item is active and current path is /medico/dashboard or /medico/, activate "Inicio"
             var isActiveExplicitlySet = document.querySelector('.medico-main-nav ul li.active');
             if (!isActiveExplicitlySet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
                  var homeAnchor = document.querySelector('.medico-main-nav ul li a[th\\:href="@{/medico/dashboard}"], .medico-main-nav ul li a[href="/medico/dashboard"]');

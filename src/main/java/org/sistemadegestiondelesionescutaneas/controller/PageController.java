@@ -85,7 +85,7 @@ public class PageController {
             medicoLogger.info("Accessing Medico Galeria Principal ({}).", uri);
             model.addAttribute("requestURI", uri);
             // Nueva plantilla para la galería de imágenes principal.
-            return "medico-galeria-principal";
+            return "medico-galeria-principal"; // Esta es la vista cuya apariencia CSS se modificó.
         }
 
         @GetMapping("/medico/imagenes/cargar-para-paciente")
@@ -147,8 +147,9 @@ public class PageController {
         public String medicoHistorialConsultas(Model model, HttpServletRequest request) {
             String requestURI = request.getRequestURI();
             model.addAttribute("requestURI", requestURI);
-            medicoLogger.info("Accessing Medico Historial Consultas {}.", requestURI);
-            return "forward:/medico/historial/consultas";
+            medicoLogger.info("Accessing Medico Historial Consultas ({}), showing medico-pacientes-lista.", requestURI);
+            // CORREGIDO: Devolver la vista deseada en lugar de reenviar a la misma URL.
+            return "medico-pacientes-lista";
         }
     }
 }
