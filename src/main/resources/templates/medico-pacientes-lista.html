@@ -103,9 +103,25 @@
         .patient-details-form label { margin-bottom: 5px; font-weight: 500; color: #495057; font-size: 0.9em; }
         .patient-details-form input[type="text"], .patient-details-form input[type="number"], .patient-details-form select { padding: 9px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em; background-color: #fff; }
         .patient-details-form input[readonly] { background-color: #e9ecef; }
-        .patient-details-form .form-actions { margin-top: 20px; text-align: right; }
+        .patient-details-form .form-actions { margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 10px;} /* MODIFICADO para flex y gap */
         .patient-details-form .save-button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; }
         .patient-details-form .save-button:hover { background-color: #218838; }
+        /* Estilo para el botón de Ver Historial (puede ser similar a .save-button o .action-btn) */
+        .view-history-button {
+            padding: 10px 20px;
+            background-color: #007bff; /* Un color azul, por ejemplo */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none; /* Para que parezca botón si es un <a> */
+            font-size: inherit; /* Para que coincida con otros botones del formulario */
+        }
+        .view-history-button:hover {
+            background-color: #0056b3;
+        }
+
 
         /* Eliminado el contenedor del botón de agregar paciente inferior */
 
@@ -139,7 +155,7 @@
 
         <div th:if="${paciente != null && paciente.id != null}" class="patient-details-form">
             <hr />
-            <h3>Detalles del Paciente: <span th:text="${paciente.nombre}"></span></h3>
+            <h3>Detalles del Paciente: <span th:text="${paciente.nombre}"></span> (<span th:text="${paciente.identificacion}"></span>)</h3>
             <form th:action="@{/medico/pacientes/actualizar}" th:object="${paciente}" method="post">
                 <input type="hidden" th:field="*{id}" />
                 <input type="hidden" name="identificacionOriginal" th:value="*{identificacion}" />
@@ -203,6 +219,10 @@
 
                 <div class="form-actions">
                     <button type="submit" class="save-button">Guardar Cambios</button>
+                    <a th:href="@{/medico/historial/consultas(idPaciente=${paciente.identificacion})}"
+                       class="view-history-button">
+                        Ver Historial
+                    </a>
                 </div>
             </form>
         </div>

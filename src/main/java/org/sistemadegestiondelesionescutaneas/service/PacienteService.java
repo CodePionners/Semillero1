@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+// import org.hibernate.Hibernate; // Descomentar si se usa Hibernate.initialize
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,12 +32,27 @@ public class PacienteService {
     public Optional<Paciente> findPacienteCompletoByIdentificacion(String identificacion) {
         Optional<Paciente> pacienteOpt = pacienteRepositorio.findByIdentificacion(identificacion);
         pacienteOpt.ifPresent(paciente -> {
-            // Con FetchType.EAGER global, las colecciones como paciente.getHistorial()
-            // se intentarán cargar automáticamente.
-            // Si persiste MultipleBagFetchException, esta es la señal de que EAGER global no es suficiente
-            // y se debe volver a LAZY + Hibernate.initialize() aquí.
-            logger.info("Paciente {} encontrado (FetchType.EAGER global). Historial size: {}",
-                    paciente.getNombre(), paciente.getHistorial() != null ? paciente.getHistorial().size() : "null (o no cargado)");
+            logger.info("Paciente {} (ID: {}) encontrado por identificación '{}'. Historial size: {}. Imágenes size: {}. Análisis size: {}",
+                    paciente.getNombre(),
+                    paciente.getId(),
+                    paciente.getIdentificacion(),
+                    paciente.getHistorial() != null ? paciente.getHistorial().size() : "null",
+                    paciente.getImagenes() != null ? paciente.getImagenes().size() : "null",
+                    paciente.getAnalisis() != null ? paciente.getAnalisis().size() : "null");
+        });
+        return pacienteOpt;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Paciente> findPacienteCompletoByDbId(Long id) {
+        Optional<Paciente> pacienteOpt = pacienteRepositorio.findById(id);
+        pacienteOpt.ifPresent(paciente -> {
+            logger.info("Paciente {} (ID: {}) encontrado por ID de BD. Historial size: {}. Imágenes size: {}. Análisis size: {}",
+                    paciente.getNombre(),
+                    paciente.getId(),
+                    paciente.getHistorial() != null ? paciente.getHistorial().size() : "null",
+                    paciente.getImagenes() != null ? paciente.getImagenes().size() : "null",
+                    paciente.getAnalisis() != null ? paciente.getAnalisis().size() : "null");
         });
         return pacienteOpt;
     }
@@ -51,7 +67,6 @@ public class PacienteService {
         Paciente pacienteExistente = pacienteRepositorio.findById(pacienteConMotivoForm.getId())
                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + pacienteConMotivoForm.getId()));
 
-        // Actualizar campos del paciente
         pacienteExistente.setNombre(pacienteConMotivoForm.getNombre());
         pacienteExistente.setEdad(pacienteConMotivoForm.getEdad());
         pacienteExistente.setSexo(pacienteConMotivoForm.getSexo());
@@ -63,7 +78,6 @@ public class PacienteService {
 
         Paciente pacienteGuardado = pacienteRepositorio.save(pacienteExistente);
 
-        // Crear y guardar una entrada en el historial
         String motivoConsulta = pacienteConMotivoForm.getMotivoConsultaActual();
         StringBuilder detallesHistorial = new StringBuilder();
         boolean hayMotivo = motivoConsulta != null && !motivoConsulta.trim().isEmpty();
@@ -89,7 +103,7 @@ public class PacienteService {
                 pacienteGuardado,
                 hayMotivo ? "Actualización de Datos y Consulta" : "Actualización de Datos de Paciente",
                 detallesHistorial.toString(),
-                "Registro completado" // O un estado más descriptivo
+                "Registro completado"
         );
         entradaHistorialRepositorio.save(nuevaEntrada);
         logger.info("Nueva entrada de historial creada para paciente ID {}", pacienteGuardado.getId());

@@ -21,9 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -98,7 +96,9 @@ public class PageController {
                 Model model, HttpServletRequest request) {
             String fullRequestUri = request.getRequestURI() + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
             model.addAttribute("requestURI", fullRequestUri);
+
             Paciente pacienteEncontrado = new Paciente();
+
             if (identificacionParaBuscar != null && !identificacionParaBuscar.trim().isEmpty()) {
                 try {
                     Optional<Paciente> pacienteOpt = pacienteService.findPacienteCompletoByIdentificacion(identificacionParaBuscar.trim());
@@ -108,7 +108,7 @@ public class PageController {
                         model.addAttribute("searchMessage", "No se encontró paciente con identificación: " + identificacionParaBuscar);
                     }
                 } catch (Exception e) {
-                    medicoLogger.error("Error buscando paciente ID {}: {}", identificacionParaBuscar, e.getMessage(), e);
+                    medicoLogger.error("Error buscando paciente con identificación {}: {}", identificacionParaBuscar, e.getMessage(), e);
                     model.addAttribute("errorMessage", "Error al buscar paciente.");
                 }
             }
@@ -130,9 +130,11 @@ public class PageController {
             if (identificacionOriginal == null || identificacionOriginal.isEmpty()) {
                 identificacionOriginal = pacienteForm.getIdentificacion();
             }
+
             String redirectUrl = "redirect:/medico/pacientes/lista" +
                     (identificacionOriginal != null && !identificacionOriginal.isEmpty() ?
                             "?identificacionParaBuscar=" + identificacionOriginal : "");
+
             if (pacienteForm.getId() == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Error: ID de paciente no hallado para actualizar.");
                 return redirectUrl;
@@ -151,7 +153,10 @@ public class PageController {
         public String medicoHistorialConsultas(
                 @RequestParam(name = "idPaciente", required = false) String idPaciente,
                 Model model, HttpServletRequest request) {
-            model.addAttribute("requestURI", request.getRequestURI() + (idPaciente != null ? "?idPaciente=" + idPaciente : ""));
+
+            String fullRequestUri = request.getRequestURI() + (idPaciente != null ? "?idPaciente=" + idPaciente : "");
+            model.addAttribute("requestURI", fullRequestUri);
+
             medicoLogger.info("Accediendo a Historial Consultas para paciente con identificación: {}", idPaciente);
 
             if (idPaciente != null && !idPaciente.trim().isEmpty()) {
@@ -159,64 +164,72 @@ public class PageController {
                 if (pacienteOpt.isPresent()) {
                     Paciente paciente = pacienteOpt.get();
                     model.addAttribute("pacienteSeleccionado", paciente);
-                    // Con EAGER global, paciente.getHistorial() debería estar cargado.
                     model.addAttribute("entradasHistorial", paciente.getHistorial());
                 } else {
                     model.addAttribute("errorMessage", "Paciente con identificación '" + idPaciente + "' no encontrado.");
                     model.addAttribute("entradasHistorial", Collections.emptyList());
+                    model.addAttribute("pacienteSeleccionado", null);
                 }
             } else {
-                model.addAttribute("infoMessage", "Para ver el historial, primero busque un paciente en la pestaña 'Pacientes' e ingrese su identificación en la URL de esta página (ej: .../consultas?idPaciente=IDENTIFICACION).");
+                model.addAttribute("infoMessage", "Para ver el historial, primero busque un paciente en la pestaña 'Pacientes' e ingrese su identificación en la URL de esta página (ej: .../consultas?idPaciente=IDENTIFICACION_DEL_PACIENTE) o use un enlace directo desde la página del paciente.");
                 model.addAttribute("entradasHistorial", Collections.emptyList());
+                model.addAttribute("pacienteSeleccionado", null);
             }
             return "medico-historial-consultas";
         }
 
         @GetMapping("/medico/historial/descargar/{pacienteId}/pdf")
-        public ResponseEntity<InputStreamResource> descargarHistorialPdf(@PathVariable("pacienteId") Long pacienteId) {
-            medicoLogger.info("Solicitud de descarga de historial PDF para paciente ID: {}", pacienteId);
-            Optional<Paciente> pacienteOpt = pacienteService.findPacienteCompletoByIdentificacion(String.valueOf(pacienteId));
+        public ResponseEntity<InputStreamResource> descargarHistorialPdf(@PathVariable("pacienteId") Long pacienteIdObject) {
+            medicoLogger.info("Solicitud de descarga de historial PDF para paciente con ID de BD: {}", pacienteIdObject);
+            Optional<Paciente> pacienteOpt = pacienteService.findPacienteCompletoByDbId(pacienteIdObject);
 
             if (pacienteOpt.isPresent()) {
-                ByteArrayInputStream bis = historialExportService.generarHistorialPdf(pacienteOpt.get());
+                Paciente paciente = pacienteOpt.get();
+                medicoLogger.info("Generando PDF para paciente: {}, Identificación: {}", paciente.getNombre(), paciente.getIdentificacion());
+
+                ByteArrayInputStream bis = historialExportService.generarHistorialPdf(paciente);
                 if (bis != null) {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Content-Disposition", "inline; filename=historial_paciente_" + pacienteOpt.get().getIdentificacion() + ".pdf");
+                    headers.add("Content-Disposition", "inline; filename=historial_paciente_" + paciente.getIdentificacion() + ".pdf");
                     return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(bis));
                 } else {
-                    medicoLogger.error("El servicio de exportación de PDF devolvió null para el paciente ID {}", pacienteId);
-                    return ResponseEntity.internalServerError().body(null); // O una respuesta de error más específica
-                }
-            }
-            medicoLogger.warn("No se pudo generar PDF para paciente ID {} (no encontrado).", pacienteId);
-            return ResponseEntity.notFound().build();
-        }
-
-        @GetMapping("/medico/historial/descargar/{pacienteId}/csv")
-        public ResponseEntity<InputStreamResource> descargarHistorialCsv(@PathVariable("pacienteId") Long pacienteId) {
-            medicoLogger.info("Solicitud de descarga de historial CSV para paciente ID: {}", pacienteId);
-            Optional<Paciente> pacienteOpt = pacienteService.findPacienteCompletoByIdentificacion(String.valueOf(pacienteId));
-
-            if (pacienteOpt.isPresent()) {
-                try {
-                    ByteArrayInputStream bis = historialExportService.generarHistorialCsv(pacienteOpt.get());
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add("Content-Disposition", "attachment; filename=historial_paciente_" + pacienteOpt.get().getIdentificacion() + ".csv");
-                    return ResponseEntity.ok().headers(headers).contentType(MediaType.parseMediaType("text/csv")).body(new InputStreamResource(bis));
-                } catch (RuntimeException e) {
-                    medicoLogger.error("Error al generar CSV para paciente ID {}: {}", pacienteId, e.getMessage(), e);
+                    medicoLogger.error("El servicio de exportación de PDF devolvió null para el paciente ID {}", pacienteIdObject);
                     return ResponseEntity.internalServerError().body(null);
                 }
             }
-            medicoLogger.warn("No se pudo generar CSV para paciente ID {} (no encontrado).", pacienteId);
+            medicoLogger.warn("No se pudo generar PDF para paciente ID {} (no encontrado).", pacienteIdObject);
             return ResponseEntity.notFound().build();
         }
 
-        // Otros métodos del MedicoController
+
+        @GetMapping("/medico/historial/descargar/{pacienteId}/csv")
+        public ResponseEntity<InputStreamResource> descargarHistorialCsv(@PathVariable("pacienteId") Long pacienteIdObject) {
+            medicoLogger.info("Solicitud de descarga de historial CSV para paciente con ID de BD: {}", pacienteIdObject);
+
+            Optional<Paciente> pacienteOpt = pacienteService.findPacienteCompletoByDbId(pacienteIdObject);
+
+            if (pacienteOpt.isPresent()) {
+                Paciente paciente = pacienteOpt.get();
+                medicoLogger.info("Generando CSV para paciente: {}, Identificación: {}", paciente.getNombre(), paciente.getIdentificacion());
+                try {
+                    ByteArrayInputStream bis = historialExportService.generarHistorialCsv(paciente);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Content-Disposition", "attachment; filename=historial_paciente_" + paciente.getIdentificacion() + ".csv");
+                    return ResponseEntity.ok().headers(headers).contentType(MediaType.parseMediaType("text/csv")).body(new InputStreamResource(bis));
+                } catch (RuntimeException e) {
+                    medicoLogger.error("Error al generar CSV para paciente ID {}: {}", pacienteIdObject, e.getMessage(), e);
+                    return ResponseEntity.internalServerError().body(null);
+                }
+            }
+            medicoLogger.warn("No se pudo generar CSV para paciente ID {} (no encontrado).", pacienteIdObject);
+            return ResponseEntity.notFound().build();
+        }
+
         @GetMapping("/medico/imagenes/cargar-para-paciente")
         public String medicoCargarImagen(Model model, HttpServletRequest request) {
             model.addAttribute("requestURI", request.getRequestURI());
             model.addAttribute("dashboardReturnUrl", "/medico/dashboard");
+            model.addAttribute("userRole", "MEDICO");
             return "cargar-imagen";
         }
         @GetMapping("/medico/galeria/info-general")

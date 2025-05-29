@@ -51,9 +51,7 @@
         box-shadow: 0 2px 6px rgba(0,86,179,0.15);
     }
     .action-btn .icon { margin-right: 10px; font-size: 1.3em; }
-    .placeholder-link:after {
-        content: " (Próximamente)"; font-size: 0.8em; color: #777; margin-left: 4px;
-    }
+    /* No se usa más .placeholder-link para los botones activos de descarga */
   </style>
 </head>
 <body>
@@ -71,13 +69,15 @@
         <tr>
           <th>Fecha</th>
           <th>Evento</th>
-          <th>Consulta</th>
-          <th>Estado</th>
+          <th>Consulta</th> <th>Estado</th>
         </tr>
         </thead>
         <tbody>
         <tr th:if="${#lists.isEmpty(entradasHistorial)}">
-          <td colspan="4" style="text-align:center; padding: 20px;">No hay entradas en el historial para mostrar. Busque un paciente para ver su historial.</td>
+          <td colspan="4" style="text-align:center; padding: 20px;">
+            <span th:if="${pacienteSeleccionado == null}" th:text="${infoMessage != null ? infoMessage : 'No hay entradas en el historial para mostrar. Busque o seleccione un paciente.'}"></span>
+            <span th:if="${pacienteSeleccionado != null}">No hay entradas en el historial para este paciente.</span>
+          </td>
         </tr>
         <tr th:each="entrada : ${entradasHistorial}">
           <td th:text="${entrada.fechaHora != null ? #temporals.format(entrada.fechaHora, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
@@ -85,8 +85,8 @@
           <td th:text="${entrada.detalles != null ? #strings.abbreviate(entrada.detalles, 50) : 'N/A'}"></td>
           <td th:text="${entrada.estado}"></td>
         </tr>
-        <tr th:if="${entradasHistorial == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr th:if="${entradasHistorial == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr th:if="${entradasHistorial == null and pacienteSeleccionado == null and infoMessage == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr th:if="${entradasHistorial == null and pacienteSeleccionado == null and infoMessage == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
         </tbody>
       </table>
     </div>
@@ -95,12 +95,27 @@
       <a th:href="@{/medico/pacientes/lista}" class="action-btn">
         <span class="icon">&#x1F50D;</span> Buscar Paciente
       </a>
-      <a th:if="${pacienteSeleccionado != null}" th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id}}" class="action-btn placeholder-link">
-        <span class="icon">&#x1F4E5;</span> Descargar Historial PDF/CSV
-      </a>
-      <a th:if="${pacienteSeleccionado == null}" href="#" class="action-btn placeholder-link" style="cursor:not-allowed; opacity:0.6;">
-        <span class="icon">&#x1F4E5;</span> Descargar Historial PDF/CSV
-      </a>
+
+      <th:block th:if="${pacienteSeleccionado != null}">
+        <a th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id} + '/pdf'}"
+           class="action-btn"
+           title="Descargar Historial en PDF">
+          <span class="icon">&#x1F4E5;</span> Descargar PDF
+        </a>
+        <a th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id} + '/csv'}"
+           class="action-btn"
+           title="Descargar Historial en CSV">
+          <span class="icon">&#x1F4E4;</span> Descargar CSV </a>
+      </th:block>
+
+      <th:block th:if="${pacienteSeleccionado == null}">
+        <a href="#" class="action-btn" style="cursor:not-allowed; opacity:0.6;" title="Seleccione un paciente para descargar su historial">
+          <span class="icon">&#x1F4E5;</span> Descargar PDF
+        </a>
+        <a href="#" class="action-btn" style="cursor:not-allowed; opacity:0.6;" title="Seleccione un paciente para descargar su historial">
+          <span class="icon">&#x1F4E4;</span> Descargar CSV
+        </a>
+      </th:block>
     </div>
   </div>
 </main>
