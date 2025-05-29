@@ -143,14 +143,12 @@ public class PageController {
         }
 
 
-        @GetMapping("/medico/historial/consultas-anteriores")
+        @GetMapping("/medico/historial/consultas")
         public String medicoHistorialConsultas(Model model, HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard"; // O una plantilla "medico-historial-consultas"
+            String requestURI = request.getRequestURI();
+            model.addAttribute("requestURI", requestURI);
+            medicoLogger.info("Accessing Medico Historial Consultas {}.", requestURI);
+            return "forward:/medico/historial/consultas";
         }
-
-        // La ruta y el método para /medico/estadisticas han sido eliminados.
     }
 }

@@ -167,7 +167,7 @@
             <a th:href="@{/medico/dashboard}">Inicio</a>
         </li>
         <li class="dropdown">
-            <a href="javascript:void(0)" class="dropbtn">Galería</a>
+            <a th:href="@{/medico/galeria/ver-imagenes}" class="dropbtn">Galería</a>
             <div class="dropdown-content">
                 <a th:href="@{/medico/galeria/ver-imagenes}">- Ver imágenes (Principal)</a>
                 <a th:href="@{/medico/imagenes/cargar-para-paciente}" class="placeholder-link">- Agregar nueva imagén</a>
@@ -182,29 +182,30 @@
             </div>
         </li>
         <li class="dropdown">
-            <a href="javascript:void(0)" class="dropbtn">Reportes</a>
+            <a th:href="@{/medico/reportes/generar}" class="dropbtn">Reportes</a>
             <div class="dropdown-content">
-                <a th:href="@{/medico/reportes/generar}" class="placeholder-link">- Generar reportes</a> <a th:href="@{/medico/reportes/ver-generados}" class="placeholder-link">- Reportes generados</a>
+                <a th:href="@{/medico/reportes/generar}">- Generar reportes</a>
+                <a th:href="@{/medico/reportes/ver-generados}" class="placeholder-link">- Reportes generados</a>
             </div>
         </li>
         <li class="dropdown">
-            <a href="javascript:void(0)" class="dropbtn">Historial</a>
+            <a th:href="@{/medico/historial/consultas}" class="dropbtn">Historial</a>
             <div class="dropdown-content">
-                <a th:href="@{/medico/historial/consultas-anteriores}" class="placeholder-link">- Ver consultas anteriores</a>
+                <a th:href="@{/medico/historial/consultas}">- Historia Clínica</a>
             </div>
         </li>
     </ul>
 </nav>
 
 <main class="medico-content-area">
-    <div class="estadistica-main-container">
+    <div class="estadistica-main-container" th:if="${#strings.equals(requestURI, '/medico/dashboard') or #strings.equals(requestURI, '/medico/')}">
         <aside class="left-sidebar-stats">
             <h3>DASHBOARD</h3>
             <ul>
                 <li><a th:href="@{/medico/dashboard}" class="active-stat-link">Inicio</a></li>
-                <li><a href="#" class="placeholder-link">Datos del Paciente</a></li>
-                <li><a href="#" class="placeholder-link">Reportes</a></li>
-                <li><a href="#" class="placeholder-link">Historia clinica</a></li>
+                <li><a th:href="@{/medico/pacientes/lista}" class="placeholder-link">Datos del Paciente</a></li>
+                <li><a th:href="@{/medico/reportes/generar}" class="placeholder-link">Reportes</a></li>
+                <li><a th:href="@{/medico/historial/consultas-anteriores}" class="placeholder-link">Historia clinica</a></li>
             </ul>
         </aside>
         <main class="center-content-stats">
@@ -256,37 +257,50 @@
 
             navLinks.forEach(function(li) {
                 li.classList.remove('active');
-                var anchor = li.querySelector('a:not(.dropbtn)');
-                var dropdownButton = li.querySelector('a.dropbtn');
+                var anchor = li.querySelector('a:not(.dropbtn)'); // Enlace directo
+                var dropdownButton = li.querySelector('a.dropbtn'); // Botón de dropdown (que ahora también es un enlace)
 
                 if (dropdownButton) {
-                    var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
-                    var isActiveInDropdown = false;
+                    var linkPath = dropdownButton.getAttribute('href');
+                    if (linkPath && (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath) && linkPath.split('/').length <= currentPath.split('/').length))) {
+                         // Casos especiales para que coincida exactamente con el dashboard o empiece por la ruta base de la sección
+                        if ((linkPath.endsWith('/medico/dashboard') || linkPath.endsWith('/medico/')) && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
+                             li.classList.add('active');
+                        } else if (currentPath.startsWith(linkPath) && !(linkPath.endsWith('/medico/dashboard') || linkPath.endsWith('/medico/'))) {
+                             li.classList.add('active');
+                        }
+                    }
+                }
+
+                if (!li.classList.contains('active') && anchor && anchor !== dropdownButton) {
+                    var directLinkPath = anchor.getAttribute('href');
+                    if (directLinkPath && currentPath === directLinkPath) {
+                         li.classList.add('active');
+                    }
+                }
+
+                // Lógica adicional para activar el padre del dropdown si un sub-enlace está activo y el padre no lo está aún
+                if (!li.classList.contains('active') && dropdownButton) {
                     var subLinks = li.querySelectorAll('.dropdown-content a');
+                    var isSubLinkActive = false;
                     subLinks.forEach(function(subLink) {
-                        var subLinkHref = subLink.getAttribute('href');
-                        if (subLinkHref && (currentPath === subLinkHref || currentPath.startsWith(subLinkHref.split("?")[0]))) {
-                           isActiveInDropdown = true;
+                        if (subLink.getAttribute('href') === currentPath) {
+                            isSubLinkActive = true;
                         }
                     });
-
-                    if (isActiveInDropdown) {
-                         li.classList.add('active');
-                    } else {
-                         if (dropdownText === 'Galería' && currentPath.startsWith('/medico/galeria')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Pacientes' && currentPath.startsWith('/medico/pacientes')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Reportes' && currentPath.startsWith('/medico/reportes')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Historial' && currentPath.startsWith('/medico/historial')) {
-                            li.classList.add('active');
-                         }
-                    }
-                } else if (anchor) {
-                    var linkPath = anchor.getAttribute('href');
-                    if (linkPath && (currentPath === linkPath || (linkPath === '/medico/dashboard' && (currentPath === '/medico/' || currentPath.startsWith('/medico/dashboard'))))) {
+                    if (isSubLinkActive) {
                         li.classList.add('active');
+                    } else { // Fallback si un sub-enlace no coincide exactamente pero la ruta sí pertenece a la categoría
+                        var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+                        var parentCategoryPath = null;
+                        if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
+                        else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
+                        else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes';
+                        else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
+
+                        if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
+                             li.classList.add('active');
+                        }
                     }
                 }
             });
