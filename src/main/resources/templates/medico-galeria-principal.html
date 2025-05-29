@@ -3,221 +3,83 @@
 <head>
     <title>Dashboard Médico - Galería Principal</title>
     <meta charset="UTF-8"/>
-    <style>
-        /* Estilos Comunes (Copia los estilos base de .body, .medico-header, .medico-main-nav, etc. de dashboard-medico.html) */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0;
-            background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh;
-        }
-        .medico-header { /* Copiado de dashboard-medico.html */
-            background-color: #0056b3; padding: 10px 25px; color: white;
-            display: flex; justify-content: flex-end; align-items: center;
-            font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .medico-header .user-info strong { margin-right: 15px; }
-        .medico-header .logout-form button {
-            background-color: #d9534f; color: white; border: none;
-            padding: 8px 12px; border-radius: 4px; cursor: pointer;
-            font-size: 0.95em; font-weight: 500;
-        }
-        .medico-header .logout-form button:hover { background-color: #c9302c; }
+    <link rel="stylesheet" th:href="@{/css/style.css}"/> <style>
+    /* Estilos comunes del dashboard y específicos de galería */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+    /* ... (Asegúrate de tener los estilos para .medico-header, .medico-main-nav, .footer aquí o en style.css) ... */
 
-        .medico-main-nav { /* Copiado de dashboard-medico.html */
-            background-color: #e9ecef; padding: 0 20px;
-            border-bottom: 1px solid #dee2e6; display: flex;
-            justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .medico-main-nav ul { list-style-type: none; margin: 0; padding: 0; overflow: hidden; display: flex; }
-        .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn {
-            display: block; color: #0056b3; text-align: center;
-            padding: 14px 20px; text-decoration: none; font-weight: 500;
-            border: none; background: none; cursor: pointer; font-size: 1em;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover,
-        .medico-main-nav ul li.active > a, .medico-main-nav ul li.active > .dropbtn {
-            background-color: #fff; color: #003875;
-            border-top: 3px solid #0056b3;
-            border-left: 1px solid #ced4da;
-            border-right: 1px solid #ced4da;
-            position: relative;
-        }
-        .medico-main-nav ul li:not(.active) a:hover, .medico-main-nav ul li:not(.active) .dropbtn:hover {
-             background-color: #d8dde1;
-             border-top: 3px solid transparent;
-             border-left: 1px solid transparent;
-             border-right: 1px solid transparent;
-         }
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-content {
-            display: none; position: absolute; background-color: #f0f8ff;
-            min-width: 220px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-            z-index: 1000; border: 1px solid #add8e6; border-top: none;
-        }
-        .dropdown-content a {
-            color: #333; padding: 10px 16px; text-decoration: none;
-            display: block; text-align: left; font-size: 0.95em;
-            border-top: none !important; border-left: none !important;
-            border-right: none !important; background-color: transparent !important;
-        }
-        .dropdown-content a:hover { background-color: #d6eaf8 !important; color: #0056b3 !important; }
-        .dropdown:hover .dropdown-content { display: block; }
-
-        /* Estilos específicos para el contenido de la galería */
-        .medico-content-area {
-            flex-grow: 1; padding: 25px; max-width: 1200px; margin: 20px auto;
-            width: 90%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .content-title {
-            font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 25px;
-            padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;
-        }
-        .image-gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Columnas responsivas */
-            gap: 20px;
-        }
-        .image-gallery-grid .image-item {
-            background-color: #eef1f5;
-            aspect-ratio: 1 / 1;
-            display: block;
-            color: #555;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            border: 1px solid #d8dde1;
-            overflow: hidden;
-            text-decoration: none;
-            position: relative;
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-        }
-         .image-gallery-grid .image-item:not(.placeholder-item):hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-            cursor: pointer;
-        }
-        .image-gallery-grid .image-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .image-gallery-grid .placeholder-item {
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #6c757d;
-            font-size: 1em;
-            cursor: default;
-            aspect-ratio: 1 / 1;
-        }
-        .image-gallery-grid .placeholder-item:hover {
-            transform: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        }
-        .placeholder-text { }
-        .error-message-galeria { color: red; background-color: #ffebeb; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom:15px; text-align: center;}
-
-        .footer {
-            text-align: center; padding: 20px; background-color: #343a40;
-            color: white; font-size: 0.9em; margin-top: auto;
-        }
-        .placeholder-link:after {
-            content: ""; font-size: 0.8em; color: #777; margin-left: 4px;
-        }
-    </style>
+    .medico-content-area { /* Estilo de contenedor principal para esta página */
+        flex-grow: 1; padding: 25px; max-width: 1200px; margin: 20px auto;
+        width: 90%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .content-title {
+        font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 25px;
+        padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;
+    }
+    .image-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Columnas responsivas */
+        gap: 20px;
+    }
+    .image-item {
+        background-color: #eef1f5;
+        aspect-ratio: 1 / 1; /* Para mantener proporción cuadrada, o ajusta según necesidad */
+        display: block;
+        color: #555;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        border: 1px solid #d8dde1;
+        overflow: hidden;
+        text-decoration: none;
+        position: relative;
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .image-item:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    }
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
+        display: block;
+    }
+    .no-images-message {
+        grid-column: 1 / -1; /* Para que ocupe todo el ancho de la grilla */
+        text-align: center; font-size: 1.1em; color: #777; padding: 30px;
+        background-color: #f9f9f9; border: 1px dashed #ddd; border-radius: 6px;
+    }
+</style>
 </head>
 <body>
 
-<header class="medico-header" th:replace="~{dashboard-medico :: medico-header}"></header>
-<nav class="medico-main-nav" th:replace="~{dashboard-medico :: medico-main-nav}"></nav>
+<header class="medico-header" th:insert="~{dashboard-medico :: medico-header}"></header>
+<nav class="medico-main-nav" th:insert="~{dashboard-medico :: medico-main-nav}"></nav>
 
 <main class="medico-content-area">
     <h1 class="content-title">Galería Principal de Imágenes</h1>
 
-    <div th:if="${errorMessageGalería}" class="error-message-galeria">
-        <p th:text="${errorMessageGalería}"></p>
-    </div>
-
     <div class="image-gallery-grid">
         <th:block th:if="${imagenesPrincipales != null and not #lists.isEmpty(imagenesPrincipales)}">
             <a th:each="imagen : ${imagenesPrincipales}"
-               th:href="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
+               th:href="@{'/imagenes/view/' + ${imagen.rutaArchivo}}"
                target="_blank"
                class="image-item"
-               th:title="${'Ver imagen completa: ' + imagen.rutaArchivo}">
-                <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
-                     th:alt="${'Imagen ID ' + imagen.id + ' - Paciente: ' + (imagen.paciente != null ? imagen.paciente.nombre : 'N/A')}"/>
+               th:title="${'Ver imagen: ' + imagen.rutaArchivo}">
+                <img th:src="@{'/imagenes/view/' + ${imagen.rutaArchivo}}"
+                     th:alt="${'Imagen ID ' + imagen.id}"/>
             </a>
         </th:block>
 
-        <th:block th:if="${(imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)) and errorMessageGalería == null}">
-            <th:block th:each="i : ${#numbers.sequence(1, 6)}">
-                <div class="image-item placeholder-item">
-                    <span class="placeholder-text" th:text="'Imagen ' + ${i}">Imagen X</span>
-                </div>
-            </th:block>
+        <th:block th:if="${imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)}">
+            <div class="no-images-message">
+                <p>No hay imágenes disponibles en la galería en este momento.</p>
+            </div>
         </th:block>
     </div>
-
 </main>
 
-<footer class="footer" th:replace="~{dashboard-medico :: footer}"></footer>
-
-<script th:inline="javascript">
-    /*<![CDATA[*/
-        // Script para activar el enlace de navegación correcto (se mantiene igual que en respuestas anteriores)
-        document.addEventListener('DOMContentLoaded', function() {
-            var currentPath = /*[[${requestURI}]]*/ window.location.pathname;
-            var navLinks = document.querySelectorAll('.medico-main-nav ul li');
-
-            navLinks.forEach(function(li) {
-                li.classList.remove('active');
-                var anchor = li.querySelector('a:not(.dropbtn)');
-                var dropdownButton = li.querySelector('a.dropbtn');
-
-                 if (dropdownButton) {
-                    var isActiveInDropdown = false;
-                    var mainDropdownLinkHref = dropdownButton.getAttribute('href');
-
-                    if (mainDropdownLinkHref && (currentPath === mainDropdownLinkHref || (mainDropdownLinkHref !== '/' && currentPath.startsWith(mainDropdownLinkHref)))) {
-                        isActiveInDropdown = true;
-                    } else {
-                        var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
-                        var parentCategoryPath = null;
-                        if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
-                        else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
-                        else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes';
-                        else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
-
-                        if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
-                            isActiveInDropdown = true;
-                        }
-                    }
-                     if (isActiveInDropdown) {
-                         li.classList.add('active');
-                     }
-
-                } else if (anchor) {
-                    var linkPath = anchor.getAttribute('href');
-                    if (linkPath && (currentPath === linkPath || (linkPath === '/medico/dashboard' && (currentPath === '/medico/' || currentPath.startsWith('/medico/dashboard'))))) {
-                        li.classList.add('active');
-                    }
-                }
-            });
-
-            var isActiveExplicitlySet = document.querySelector('.medico-main-nav ul li.active');
-            if (!isActiveExplicitlySet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
-                 var homeAnchor = document.querySelector('.medico-main-nav ul li a[th\\:href="@{/medico/dashboard}"], .medico-main-nav ul li a[href="/medico/dashboard"]');
-                 if (homeAnchor && homeAnchor.parentElement) {
-                     homeAnchor.parentElement.classList.add('active');
-                 }
-            }
-        });
-    /*]]>*/
-</script>
-
+<footer class="footer" th:insert="~{dashboard-medico :: footer}"></footer>
+<script th:inline="javascript" th:src="@{/js/medico-dashboard-nav.js}" defer></script>
 </body>
 </html>

@@ -1,12 +1,12 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
 import jakarta.persistence.*;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
-@Table(name = "pacientes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"identificacion"}, name = "uk_paciente_identificacion")
+@Table(name = "pacientes", indexes = {
+        @Index(name = "idx_paciente_identificacion", columnList = "identificacion", unique = true)
 })
 public class Paciente {
 
@@ -24,32 +24,52 @@ public class Paciente {
     @Column(length = 20)
     private Sexo sexo;
 
-    // NUEVO CAMPO PARA IDENTIFICACIÓN
-    @Column(name = "identificacion", unique = true, nullable = true, length = 50) // Nullable si un paciente puede ser creado por un médico sin ser aún un usuario. Ajustar según lógica.
+    @Column(name = "identificacion", unique = true, nullable = true, length = 50)
     private String identificacion;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private EdadEstimada edadEstimadaLesion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100)
+    private AreaCorporalAfectada areaCorporalAfectadaPredominante;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100)
+    private TipoPielFitzpatrick tipoPielFitzpatrick;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100)
+    private TamanodeLesion tamanodeLesionGeneral;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100)
+    private AntecedentesFamiliaresCancer antecedentesFamiliaresCancer;
+
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ImagenLesion> imagenes = new ArrayList<>();
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<ImagenLesion> imagenes = new HashSet<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<AnalisisDermatologico> analisis = new ArrayList<>();
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<AnalisisDermatologico> analisis = new HashSet<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<EntradaHistorial> historial = new ArrayList<>();
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<EntradaHistorial> historial = new HashSet<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Reporte> reportes = new ArrayList<>();
+    // Colección de reportes ELIMINADA
+    // @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    // private Set<Reporte> reportes = new HashSet<>();
 
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<HistorialLesionPrevia> historialLesionesPrevias = new ArrayList<>();
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<HistorialLesionPrevia> historialLesionesPrevias = new HashSet<>();
 
     public Paciente() {}
 
-    // Getters y Setters (existentes)
+    // Getters y Setters (se eliminan los de 'reportes')
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }
@@ -58,33 +78,31 @@ public class Paciente {
     public void setEdad(Integer edad) { this.edad = edad; }
     public Sexo getSexo() { return sexo; }
     public void setSexo(Sexo sexo) { this.sexo = sexo; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public List<ImagenLesion> getImagenes() { return imagenes; }
-    public void setImagenes(List<ImagenLesion> imagenes) { this.imagenes = imagenes; }
-    public List<AnalisisDermatologico> getAnalisis() { return analisis; }
-    public void setAnalisis(List<AnalisisDermatologico> analisis) { this.analisis = analisis; }
-    public List<EntradaHistorial> getHistorial() { return historial; }
-    public void setHistorial(List<EntradaHistorial> historial) { this.historial = historial; }
-    public List<Reporte> getReportes() { return reportes; }
-    public void setReportes(List<Reporte> reportes) { this.reportes = reportes; }
-    public List<HistorialLesionPrevia> getHistorialLesionesPrevias() { return historialLesionesPrevias; }
-    public void setHistorialLesionesPrevias(List<HistorialLesionPrevia> historialLesionesPrevias) { this.historialLesionesPrevias = historialLesionesPrevias; }
-
-    // GETTER Y SETTER PARA IDENTIFICACIÓN
     public String getIdentificacion() { return identificacion; }
     public void setIdentificacion(String identificacion) { this.identificacion = identificacion; }
-
+    public EdadEstimada getEdadEstimadaLesion() { return edadEstimadaLesion; }
+    public void setEdadEstimadaLesion(EdadEstimada edadEstimadaLesion) { this.edadEstimadaLesion = edadEstimadaLesion; }
+    public AreaCorporalAfectada getAreaCorporalAfectadaPredominante() { return areaCorporalAfectadaPredominante; }
+    public void setAreaCorporalAfectadaPredominante(AreaCorporalAfectada areaCorporalAfectadaPredominante) { this.areaCorporalAfectadaPredominante = areaCorporalAfectadaPredominante; }
+    public TipoPielFitzpatrick getTipoPielFitzpatrick() { return tipoPielFitzpatrick; }
+    public void setTipoPielFitzpatrick(TipoPielFitzpatrick tipoPielFitzpatrick) { this.tipoPielFitzpatrick = tipoPielFitzpatrick; }
+    public TamanodeLesion getTamanodeLesionGeneral() { return tamanodeLesionGeneral; }
+    public void setTamanodeLesionGeneral(TamanodeLesion tamanodeLesionGeneral) { this.tamanodeLesionGeneral = tamanodeLesionGeneral; }
+    public AntecedentesFamiliaresCancer getAntecedentesFamiliaresCancer() { return antecedentesFamiliaresCancer; }
+    public void setAntecedentesFamiliaresCancer(AntecedentesFamiliaresCancer antecedentesFamiliaresCancer) { this.antecedentesFamiliaresCancer = antecedentesFamiliaresCancer; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public Set<ImagenLesion> getImagenes() { return imagenes; }
+    public void setImagenes(Set<ImagenLesion> imagenes) { this.imagenes = imagenes; }
+    public Set<AnalisisDermatologico> getAnalisis() { return analisis; }
+    public void setAnalisis(Set<AnalisisDermatologico> analisis) { this.analisis = analisis; }
+    public Set<EntradaHistorial> getHistorial() { return historial; }
+    public void setHistorial(Set<EntradaHistorial> historial) { this.historial = historial; }
+    public Set<HistorialLesionPrevia> getHistorialLesionesPrevias() { return historialLesionesPrevias; }
+    public void setHistorialLesionesPrevias(Set<HistorialLesionPrevia> historialLesionesPrevias) { this.historialLesionesPrevias = historialLesionesPrevias; }
 
     @Override
     public String toString() {
-        return "Paciente{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", edad=" + edad +
-                ", sexo=" + sexo +
-                ", identificacion='" + identificacion + '\'' +
-                ", usuarioId=" + (usuario != null ? usuario.getId() : "null") +
-                '}';
+        return "Paciente{" + "id=" + id + ", nombre='" + nombre + '\'' + ", identificacion='" + identificacion + '\'' + '}';
     }
 }

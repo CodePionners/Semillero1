@@ -3,264 +3,109 @@
 <head>
   <title>Dashboard Médico - Historial de Consultas</title>
   <meta charset="UTF-8"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
   <style>
-    /* Estilos Comunes (copiados/adaptados de otras páginas del dashboard médico) */
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0;
-        background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh;
-    }
-    .medico-header {
-        background-color: #0056b3; padding: 10px 25px; color: white;
-        display: flex; justify-content: flex-end; align-items: center;
-        font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    /* Copia aquí los estilos comunes del dashboard médico */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+    .medico-header { background-color: #0056b3; padding: 10px 25px; color: white; display: flex; justify-content: flex-end; align-items: center; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .medico-header .user-info strong { margin-right: 15px; }
-    .medico-header .logout-form button {
-        background-color: #d9534f; color: white; border: none;
-        padding: 8px 12px; border-radius: 4px; cursor: pointer;
-        font-size: 0.95em; font-weight: 500;
-    }
-    .medico-header .logout-form button:hover { background-color: #c9302c; }
+    .medico-header .logout-form button { background-color: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.95em; font-weight: 500; }
+    .medico-main-nav { background-color: #e9ecef; padding: 0 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .medico-main-nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; }
+    .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn { display: block; color: #0056b3; text-align: center; padding: 14px 20px; text-decoration: none; font-weight: 500; border: none; background: none; cursor: pointer; font-size: 1em; }
+    .medico-main-nav ul li a:hover, .medico-main-nav ul li.active > a { background-color: #fff; color: #003875; border-top: 3px solid #0056b3; border-left: 1px solid #ced4da; border-right: 1px solid #ced4da; }
+    .footer { text-align: center; padding: 20px; background-color: #343a40; color: white; font-size: 0.9em; margin-top: auto; }
 
-    .medico-main-nav {
-        background-color: #e9ecef; padding: 0 20px;
-        border-bottom: 1px solid #dee2e6; display: flex;
-        justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* Estilos para la página de Historial, similar a la imagen de "Historial General" */
+    .historial-page-content-area {
+        flex-grow: 1; padding: 25px; max-width: 1000px; margin: 20px auto; width: 90%;
     }
-    .medico-main-nav ul { list-style-type: none; margin: 0; padding: 0; overflow: hidden; display: flex; }
-    .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn {
-        display: block; color: #0056b3; text-align: center;
-        padding: 14px 20px; text-decoration: none; font-weight: 500;
-        border: none; background: none; cursor: pointer; font-size: 1em;
-        transition: background-color 0.3s, color 0.3s;
+    .main-content-box {
+        background-color: #fff; padding: 25px 30px; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .medico-main-nav ul li a:hover, .medico-main-nav ul li .dropbtn:hover,
-    .medico-main-nav ul li.active > a, .medico-main-nav ul li.active > .dropbtn {
-        background-color: #fff; color: #003875;
-        border-top: 3px solid #0056b3;
-        border-left: 1px solid #ced4da;
-        border-right: 1px solid #ced4da;
-        position: relative;
+    .content-title {
+        font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 30px;
+        padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; text-align: center;
     }
-    .medico-main-nav ul li:not(.active) a:hover, .medico-main-nav ul li:not(.active) .dropbtn:hover {
-         background-color: #d8dde1;
-         border-top: 3px solid transparent;
-         border-left: 1px solid transparent;
-         border-right: 1px solid transparent;
-     }
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content {
-        display: none; position: absolute; background-color: #f0f8ff;
-        min-width: 220px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-        z-index: 1000; border: 1px solid #add8e6; border-top: none;
+    .historial-table-container { margin-bottom: 30px; }
+    .historial-table { width: 100%; border-collapse: collapse; }
+    .historial-table th, .historial-table td {
+        border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; font-size: 1em;
     }
-    .dropdown-content a {
-        color: #333; padding: 10px 16px; text-decoration: none;
-        display: block; text-align: left; font-size: 0.95em;
-        border-top: none !important; border-left: none !important;
-        border-right: none !important; background-color: transparent !important;
+    .historial-table th { background-color: #f8f9fa; color: #333; font-weight: 600; }
+    .historial-table td { background-color: #fff; height: 45px; }
+
+    .action-buttons-container {
+        text-align: center; margin-top: 30px; margin-bottom: 20px;
+        display: flex; justify-content: center; gap: 15px; /* Para alinear botones */
     }
-    .dropdown-content a:hover { background-color: #d6eaf8 !important; color: #0056b3 !important; }
-    .dropdown:hover .dropdown-content { display: block; }
-    .footer {
-        text-align: center; padding: 20px; background-color: #343a40;
-        color: white; font-size: 0.9em; margin-top: auto;
+    .action-btn {
+        background-color: #e9f5ff; color: #0056b3; border: 1px solid #b8d7f7;
+        padding: 12px 25px; font-size: 1.1em; font-weight: 500; border-radius: 6px;
+        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+        transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
+    .action-btn:hover {
+        background-color: #d6eaf8; border-color: #0056b3;
+        box-shadow: 0 2px 6px rgba(0,86,179,0.15);
+    }
+    .action-btn .icon { margin-right: 10px; font-size: 1.3em; }
     .placeholder-link:after {
         content: " (Próximamente)"; font-size: 0.8em; color: #777; margin-left: 4px;
     }
-
-    /* Estilos específicos para la página de Historial */
-    .historial-content-area {
-        flex-grow: 1;
-        padding: 25px;
-        max-width: 1000px; /* Ajustado para una tabla potencialmente más ancha */
-        margin: 20px auto;
-        width: 90%;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .content-title { /* Título para la sección */
-        font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 30px;
-        padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;
-        text-align: center;
-    }
-
-    .historial-table-container {
-        margin-bottom: 40px; /* Más espacio antes del botón */
-    }
-
-    .historial-table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 1px solid #ccc; /* Borde alrededor de la tabla */
-    }
-
-    .historial-table th, .historial-table td {
-        border: 1px solid #e0e0e0; /* Bordes internos más suaves */
-        padding: 12px 15px;
-        text-align: left;
-        font-size: 1em;
-        vertical-align: middle;
-    }
-
-    .historial-table th {
-        background-color: #f8f9fa; /* Gris claro para encabezados */
-        color: #333;
-        font-weight: 600;
-    }
-
-    .historial-table td {
-        background-color: #fff;
-        height: 45px; /* Altura fija para filas, incluso vacías */
-    }
-    .historial-table tr:nth-child(even) td {
-        background-color: #fdfdfd; /* Color alterno opcional para filas */
-    }
-
-    .historial-table td.empty-cell { /* Para celdas explícitamente vacías si se necesita */
-        color: #999;
-        font-style: italic;
-    }
-
-    .historia-clinica-button-container {
-        text-align: center;
-        margin-top: 30px;
-        margin-bottom: 20px;
-    }
-
-    .historia-clinica-btn {
-        background-color: #e9f5ff; /* Azul muy claro, similar a la imagen */
-        color: #0056b3; /* Texto azul oscuro */
-        border: 1px solid #b8d7f7; /* Borde azul claro */
-        padding: 12px 25px;
-        font-size: 1.1em;
-        font-weight: 500;
-        border-radius: 6px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex; /* Para alinear ícono y texto */
-        align-items: center;
-        transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-
-    .historia-clinica-btn:hover {
-        background-color: #d6eaf8;
-        border-color: #0056b3;
-        box-shadow: 0 2px 6px rgba(0,86,179,0.15);
-    }
-
-    .historia-clinica-btn .icon {
-        margin-right: 10px; /* Espacio entre ícono y texto */
-        font-size: 1.3em; /* Tamaño del ícono */
-        line-height: 1; /* Para mejor alineación vertical */
-    }
-
   </style>
 </head>
 <body>
 
-<header class="medico-header" th:replace="~{dashboard-medico :: medico-header}"></header>
-<nav class="medico-main-nav" th:replace="~{dashboard-medico :: medico-main-nav}"></nav>
+<header class="medico-header" th:insert="~{dashboard-medico :: medico-header}"></header>
+<nav class="medico-main-nav" th:insert="~{dashboard-medico :: medico-main-nav}"></nav>
 
-<main class="historial-content-area">
-  <h1 class="content-title">Historial General</h1>
+<main class="historial-page-content-area">
+  <div class="main-content-box">
+    <h1 class="content-title">Historial General</h1>
 
-  <div class="historial-table-container">
-    <table class="historial-table">
-      <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Evento</th>
-        <th>Consulta</th> <th>Estado</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr>
-        <td>&nbsp;</td> <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="historial-table-container">
+      <table class="historial-table">
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Evento</th>
+          <th>Consulta</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(entradasHistorial)}">
+          <td colspan="4" style="text-align:center; padding: 20px;">No hay entradas en el historial para mostrar. Busque un paciente para ver su historial.</td>
+        </tr>
+        <tr th:each="entrada : ${entradasHistorial}">
+          <td th:text="${entrada.fechaHora != null ? #temporals.format(entrada.fechaHora, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+          <td th:text="${entrada.evento}"></td>
+          <td th:text="${entrada.detalles != null ? #strings.abbreviate(entrada.detalles, 50) : 'N/A'}"></td>
+          <td th:text="${entrada.estado}"></td>
+        </tr>
+        <tr th:if="${entradasHistorial == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr th:if="${entradasHistorial == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="action-buttons-container">
+      <a th:href="@{/medico/pacientes/lista}" class="action-btn">
+        <span class="icon">&#x1F50D;</span> Buscar Paciente
+      </a>
+      <a th:if="${pacienteSeleccionado != null}" th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id}}" class="action-btn placeholder-link">
+        <span class="icon">&#x1F4E5;</span> Descargar Historial PDF/CSV
+      </a>
+      <a th:if="${pacienteSeleccionado == null}" href="#" class="action-btn placeholder-link" style="cursor:not-allowed; opacity:0.6;">
+        <span class="icon">&#x1F4E5;</span> Descargar Historial PDF/CSV
+      </a>
+    </div>
   </div>
-
-  <div class="historia-clinica-button-container">
-    <a th:href="@{/medico/pacientes/buscar}" class="historia-clinica-btn placeholder-link">
-      <span class="icon">&#x1F50D;</span> Historia clínica
-    </a>
-  </div>
-
 </main>
 
-<footer class="footer" th:replace="~{dashboard-medico :: footer}"></footer>
-
-<script th:inline="javascript">
-  /*<![CDATA[*/
-      // Script para activar el enlace de navegación correcto
-      document.addEventListener('DOMContentLoaded', function() {
-          var currentPath = /*[[${requestURI}]]*/ window.location.pathname; // Asegúrate de pasar requestURI desde el controlador
-          var navLinks = document.querySelectorAll('.medico-main-nav ul li');
-
-          navLinks.forEach(function(li) {
-              li.classList.remove('active');
-              var anchor = li.querySelector('a:not(.dropbtn)');
-              var dropdownButton = li.querySelector('a.dropbtn');
-
-              if (dropdownButton) {
-                  var linkPath = dropdownButton.getAttribute('href');
-                   // Comprobar si el enlace del botón del dropdown es la página actual O es un prefijo de la página actual
-                  if (linkPath && (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath)))) {
-                      if ((linkPath.endsWith('/medico/dashboard') || linkPath.endsWith('/medico/')) && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
-                           li.classList.add('active');
-                      } else if (currentPath.startsWith(linkPath) && !(linkPath.endsWith('/medico/dashboard') || linkPath.endsWith('/medico/'))) {
-                           li.classList.add('active');
-                      }
-                  } else {
-                      // Si no, comprobar si alguna subpágina del dropdown está activa
-                      var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
-                      var parentCategoryPath = null;
-                      if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
-                      else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
-                      else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes';
-                      else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
-
-                      if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
-                          li.classList.add('active');
-                      }
-                  }
-              } else if (anchor) { // Para pestañas que no son dropdowns
-                  var directLinkPath = anchor.getAttribute('href');
-                  if (directLinkPath && currentPath === directLinkPath) {
-                      li.classList.add('active');
-                  }
-              }
-          });
-          // Activar "Inicio" si ninguna otra pestaña está activa y estamos en la página principal del médico
-          var isActiveExplicitlySet = document.querySelector('.medico-main-nav ul li.active');
-          if (!isActiveExplicitlySet && (currentPath === '/medico/dashboard' || currentPath === '/medico/')) {
-               var homeAnchor = document.querySelector('.medico-main-nav ul li a[th\\:href="@{/medico/dashboard}"], .medico-main-nav ul li a[href="/medico/dashboard"]');
-               if (homeAnchor && homeAnchor.parentElement) {
-                   homeAnchor.parentElement.classList.add('active');
-               }
-          }
-      });
-  /*]]>*/
-</script>
-
+<footer class="footer" th:insert="~{dashboard-medico :: footer}"></footer>
+<script th:inline="javascript" th:src="@{/js/medico-dashboard-nav.js}" defer></script>
 </body>
 </html>

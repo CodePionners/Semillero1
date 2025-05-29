@@ -12,7 +12,7 @@ public class HistorialLesionPrevia {
     @Column(name = "id_historial_lesion")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
 
@@ -32,13 +32,11 @@ public class HistorialLesionPrevia {
     private String complicaciones;
 
     @Column(length = 255)
-    private String condicionpreexistente; //dermatitis, diabetes
+    private String condicionpreexistente;
 
-
-    // Constructores, Getters y Setters
     public HistorialLesionPrevia() {}
 
-    // Getters y Setters para todos los campos
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Paciente getPaciente() { return paciente; }

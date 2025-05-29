@@ -10,10 +10,10 @@ public class EntradaHistorial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entrada_historial")
-    private Long id; // Cambiado de String a Long
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_paciente", nullable = false) // FK
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
 
     @Column(nullable = false)
@@ -22,18 +22,19 @@ public class EntradaHistorial {
     @Column(nullable = false)
     private String evento;
 
-    @Lob // Para textos largos
+    @Lob
     private String detalles;
 
     @Column(length = 50)
     private String estado;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_analisis_referencia")
     private AnalisisDermatologico analisisreferencia;
 
     public EntradaHistorial() {}
 
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Paciente getPaciente() { return paciente; }
