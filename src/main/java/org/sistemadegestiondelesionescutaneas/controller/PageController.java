@@ -36,7 +36,7 @@ public class PageController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String requestURI = request.getRequestURI();
         logger.info("Accessing homePage ({}). Authentication object: {}", requestURI, authentication);
-        model.addAttribute("requestURI", requestURI);
+        model.addAttribute("requestURI", requestURI); // Pasar requestURI para la lógica de la pestaña activa
 
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal().toString())) {
             String username = authentication.getName();
@@ -49,11 +49,13 @@ public class PageController {
                     logger.info("User '{}' is ROLE_PACIENTE, redirecting to /imagenes/historial", username);
                     return "redirect:/imagenes/historial";
                 } else if ("ROLE_MEDICO".equals(role)) {
-                    logger.info("User '{}' is ROLE_MEDICO, forwarding to /medico/dashboard", username);
+                    logger.info("User '{}' is ROLE_MEDICO, forwarding to /medico/dashboard (Inicio - Estadisticas)", username);
+                    // Ya no se redirige, se reenvía para que el controlador del dashboard maneje la requestURI
                     return "forward:/medico/dashboard";
                 } else if ("ROLE_ADMIN".equals(role)) {
                     logger.info("User '{}' is ROLE_ADMIN, returning 'dashboard-admin' view. Consider forwarding to an admin controller.", username);
-                    return "dashboard-admin"; // Consider forwarding to an admin controller if you have one
+                    model.addAttribute("requestURI", "/admin/dashboard"); // Simular URI para admin dashboard si es necesario
+                    return "dashboard-admin"; // Considera un controlador específico para admin
                 }
             }
             logger.warn("User '{}' authenticated but has an unhandled role. Redirecting to /login.", username);
@@ -71,23 +73,44 @@ public class PageController {
         @GetMapping("/medico/dashboard")
         public String medicoDashboard(Model model, HttpServletRequest request) {
             String requestURI = request.getRequestURI();
-            medicoLogger.info("Accessing Medico Dashboard ({}).", requestURI);
+            medicoLogger.info("Accessing Medico Dashboard (Inicio - Contenido de Estadísticas) ({}).", requestURI);
             model.addAttribute("requestURI", requestURI);
+            // dashboard-medico.html ahora contiene el layout de estadísticas para la vista de Inicio.
             return "dashboard-medico";
         }
 
-        @GetMapping("/medico/estadisticas")
-        public String medicoEstadisticas(Model model, HttpServletRequest request) {
-            String requestURI = request.getRequestURI();
-            medicoLogger.info("Accessing Medico Estadisticas ({}).", requestURI);
-            model.addAttribute("requestURI", requestURI);
-            return "medico-estadisticas";
+        @GetMapping("/medico/galeria/ver-imagenes")
+        public String medicoGaleriaVerImagenes(Model model, HttpServletRequest request) {
+            String uri = request.getRequestURI();
+            medicoLogger.info("Accessing Medico Galeria Principal ({}).", uri);
+            model.addAttribute("requestURI", uri);
+            // Nueva plantilla para la galería de imágenes principal.
+            return "medico-galeria-principal";
+        }
+
+        @GetMapping("/medico/imagenes/cargar-para-paciente")
+        public String medicoCargarImagen(Model model, HttpServletRequest request) {
+            String uri = request.getRequestURI();
+            model.addAttribute("requestURI", uri);
+            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
+            // Implementa la vista o redirige según sea necesario.
+            // Por ejemplo, podría ser un modal en otra página o una página dedicada.
+            // Si es un placeholder, redirigir a una vista relevante.
+            return "forward:/medico/dashboard"; // O a una página específica de carga de imágenes.
+        }
+
+        @GetMapping("/medico/galeria/info-general")
+        public String medicoGaleriaInfoGeneral(Model model, HttpServletRequest request) {
+            String uri = request.getRequestURI();
+            model.addAttribute("requestURI", uri);
+            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
+            return "forward:/medico/dashboard"; // O a una página de información general de galería.
         }
 
         @GetMapping("/medico/pacientes/lista")
         public String medicoPacientesLista(Model model, HttpServletRequest request) {
             String requestURI = request.getRequestURI();
-            medicoLogger.info("Accessing Medico Pacientes Lista ({}). ESTE LOG ES CLAVE.", requestURI);
+            medicoLogger.info("Accessing Medico Pacientes Lista ({}).", requestURI);
             model.addAttribute("requestURI", requestURI);
             return "medico-pacientes-lista";
         }
@@ -97,48 +120,37 @@ public class PageController {
             String requestURI = request.getRequestURI();
             medicoLogger.info("Accessing Medico Pacientes Agregar Form ({}). Placeholder.", requestURI);
             model.addAttribute("requestURI", requestURI);
-            medicoLogger.warn("Placeholder for /medico/pacientes/agregar. Implement actual form or view. Redirecting to lista for now.");
-            return "redirect:/medico/pacientes/lista";
+            // Deberías tener una plantilla para esto o redirigir.
+            // "redirect:/medico/pacientes/lista" es una opción si no está implementado.
+            return "medico-pacientes-lista"; // O una plantilla como "medico-pacientes-agregar"
         }
 
-        @GetMapping("/medico/galeria/ver-imagenes")
-        public String medicoGaleriaVerImagenes(Model model, HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
-        }
-
-        @GetMapping("/medico/imagenes/cargar-para-paciente")
-        public String medicoCargarImagen(Model model, HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
-        }
-
-        @GetMapping("/medico/galeria/info-general")
-        public String medicoGaleriaInfoGeneral(Model model, HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
-        }
-
-        @GetMapping("/medico/reportes")
-        public String medicoReportes (Model model, HttpServletRequest request){
+        @GetMapping("/medico/reportes/generar")
+        public String medicoReportesGenerar(Model model, HttpServletRequest request) {
             String requestURI = request.getRequestURI();
-            medicoLogger.info("Accessing Medico Reportes ({}).", requestURI);
+            medicoLogger.info("Accessing Medico Reportes Generar ({}).", requestURI);
             model.addAttribute("requestURI", requestURI);
-            return "medico-reportes"; // Temporalmente reenvía o implementa la vista
+            return "medico-reportes-generar"; // Plantilla para generar reportes
         }
+
+        @GetMapping("/medico/reportes/ver-generados")
+        public String medicoReportesVerGenerados(Model model, HttpServletRequest request) {
+            String requestURI = request.getRequestURI();
+            medicoLogger.info("Accessing Medico Reportes Ver Generados ({}). Placeholder.", requestURI);
+            model.addAttribute("requestURI", requestURI);
+            // Implementa esta vista. Podría ser similar a 'medico-reportes-generar' pero para visualización.
+            return "forward:/medico/dashboard"; // O una plantilla "medico-reportes-ver"
+        }
+
 
         @GetMapping("/medico/historial/consultas-anteriores")
         public String medicoHistorialConsultas(Model model, HttpServletRequest request) {
             String uri = request.getRequestURI();
             model.addAttribute("requestURI", uri);
             medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard";
+            return "forward:/medico/dashboard"; // O una plantilla "medico-historial-consultas"
         }
+
+        // La ruta y el método para /medico/estadisticas han sido eliminados.
     }
 }
