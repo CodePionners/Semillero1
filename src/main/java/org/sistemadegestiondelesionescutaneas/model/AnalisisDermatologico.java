@@ -25,47 +25,21 @@ public class AnalisisDermatologico {
     @Column(nullable = false)
     private LocalDateTime fechahoraanalisis;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private Sexo sexo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 50)
-    private EdadEstimada edadestimada;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private AreaCorporalAfectada areacorporalafectada;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private TipoPielFitzpatrick tipopielfitzpatrick;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private TamanodeLesion tamanodelesion;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private AntecedentesFamiliaresCancer antecedentesfamiliarescancer;
-
+    @Enumerated(EnumType.STRING) @Column(length = 20) private Sexo sexo;
+    @Enumerated(EnumType.STRING) @Column(length = 50) private EdadEstimada edadestimada;
+    @Enumerated(EnumType.STRING) @Column(length = 100) private AreaCorporalAfectada areacorporalafectada;
+    @Enumerated(EnumType.STRING) @Column(length = 100) private TipoPielFitzpatrick tipopielfitzpatrick;
+    @Enumerated(EnumType.STRING) @Column(length = 100) private TamanodeLesion tamanodelesion;
+    @Enumerated(EnumType.STRING) @Column(length = 100) private AntecedentesFamiliaresCancer antecedentesfamiliarescancer;
     private Boolean historiallesionesprevias;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private Diagnostico diagnostico;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 50) private Diagnostico diagnostico;
 
     @OneToMany(mappedBy = "analisisreferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<EntradaHistorial> entradasHistorial = new HashSet<>();
 
-    // Colección reportesGenerados ELIMINADA
-    // @OneToMany(mappedBy = "analisisReferencia", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    // private Set<Reporte> reportesGenerados = new HashSet<>();
-
-
     public AnalisisDermatologico() {}
 
-    // Getters y Setters (se eliminan los de reportesGenerados)
+    // Getters y Setters (sin cambios en firma, tipos Set correctos)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Paciente getPaciente() { return paciente; }

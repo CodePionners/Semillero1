@@ -60,16 +60,15 @@ public class Paciente {
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<EntradaHistorial> historial = new HashSet<>();
 
-    // Colección de reportes ELIMINADA
-    // @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    // private Set<Reporte> reportes = new HashSet<>();
-
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<HistorialLesionPrevia> historialLesionesPrevias = new HashSet<>();
 
+    @Transient
+    private String motivoConsultaActual;
+
     public Paciente() {}
 
-    // Getters y Setters (se eliminan los de 'reportes')
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }
@@ -100,9 +99,9 @@ public class Paciente {
     public void setHistorial(Set<EntradaHistorial> historial) { this.historial = historial; }
     public Set<HistorialLesionPrevia> getHistorialLesionesPrevias() { return historialLesionesPrevias; }
     public void setHistorialLesionesPrevias(Set<HistorialLesionPrevia> historialLesionesPrevias) { this.historialLesionesPrevias = historialLesionesPrevias; }
+    public String getMotivoConsultaActual() { return motivoConsultaActual; }
+    public void setMotivoConsultaActual(String motivoConsultaActual) { this.motivoConsultaActual = motivoConsultaActual; }
 
     @Override
-    public String toString() {
-        return "Paciente{" + "id=" + id + ", nombre='" + nombre + '\'' + ", identificacion='" + identificacion + '\'' + '}';
-    }
+    public String toString() { return "Paciente{id=" + id + ", nombre='" + nombre + '\'' + ", identificacion='" + identificacion + '\'' + '}'; }
 }

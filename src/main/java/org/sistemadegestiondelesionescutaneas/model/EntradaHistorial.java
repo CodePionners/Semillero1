@@ -19,10 +19,10 @@ public class EntradaHistorial {
     @Column(nullable = false)
     private LocalDateTime fechaHora;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String evento;
 
-    @Lob
+    @Column(length = 1000)
     private String detalles;
 
     @Column(length = 50)
@@ -32,7 +32,17 @@ public class EntradaHistorial {
     @JoinColumn(name = "id_analisis_referencia")
     private AnalisisDermatologico analisisreferencia;
 
-    public EntradaHistorial() {}
+    public EntradaHistorial() {
+        this.fechaHora = LocalDateTime.now();
+    }
+
+    public EntradaHistorial(Paciente paciente, String evento, String detalles, String estado) {
+        this();
+        this.paciente = paciente;
+        this.evento = evento;
+        this.detalles = detalles;
+        this.estado = estado;
+    }
 
     // Getters y Setters
     public Long getId() { return id; }
