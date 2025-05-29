@@ -62,7 +62,8 @@ public class Autenticacion {
                 logger.error("Error de validación: La identificación es requerida para el rol PACIENTE.");
                 throw new IllegalArgumentException("La identificación del paciente es requerida para el rol PACIENTE.");
             }
-            if (pacienteRepositorio.findByIdentificacion(identificacionPaciente).isPresent()) {
+            // Utilizar el método findByIdentificacion que devuelve Optional<Paciente>
+            if (pacienteRepositorio.findByIdentificacion(identificacionPaciente).isPresent()) { //
                 logger.warn("Intento de registrar paciente con identificación existente: {}", identificacionPaciente);
                 throw new IllegalArgumentException("La identificación del paciente ya está registrada.");
             }
@@ -72,7 +73,7 @@ public class Autenticacion {
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsuario(nombreUsuario);
         nuevoUsuario.setContrasena(hashedPassword);
-        nuevoUsuario.setRol(rol.toUpperCase());
+        nuevoUsuario.setRol(rol.toUpperCase()); // Asegurar que el rol se guarde en mayúsculas para consistencia con Spring Security
         nuevoUsuario.setNombre(nombreCompleto);
         nuevoUsuario.setEmail(email);
 
@@ -85,20 +86,29 @@ public class Autenticacion {
             throw new RuntimeException("Error al guardar el usuario en la base de datos.", e);
         }
 
-        if ("PACIENTE".equalsIgnoreCase(rol)) {
+        if ("PACIENTE".equalsIgnoreCase(rol)) { //
             logger.info("Creando perfil de Paciente para usuario: {} con identificación: {}", savedUsuario.getUsuario(), identificacionPaciente);
             Paciente nuevoPaciente = new Paciente();
-            nuevoPaciente.setUsuario(savedUsuario);
+            nuevoPaciente.setUsuario(savedUsuario); // Asociar el usuario al paciente
             nuevoPaciente.setNombre(nombreCompleto); // El nombre del paciente es el nombre completo del usuario
             nuevoPaciente.setIdentificacion(identificacionPaciente); // Establecer la identificación
+
+            // Aquí podrías establecer otros campos por defecto para Paciente si es necesario
+            // nuevoPaciente.setEdad(...);
+            // nuevoPaciente.setSexo(...);
 
             try {
                 Paciente savedPaciente = pacienteRepositorio.save(nuevoPaciente);
                 logger.info("Perfil de Paciente creado con ID: {} para usuario ID: {}", savedPaciente.getId(), savedUsuario.getId());
                 savedUsuario.setPerfilPaciente(savedPaciente); // Actualizar la referencia en el objeto Usuario
+                // No es necesario un save explícito de savedUsuario aquí si la transacción sigue activa y @OneToOne tiene el cascade adecuado
+                // o si la relación es gestionada correctamente por JPA. Hibernate marcará savedUsuario como dirty y lo actualizará.
             } catch (Exception e) {
                 logger.error("EXCEPCIÓN al intentar guardar el perfil del paciente para el usuario: {}. Identificación: {}",
                         savedUsuario.getUsuario(), identificacionPaciente, e);
+                // Considerar si se debe eliminar el 'savedUsuario' si la creación del paciente falla,
+                // o manejar la transacción para que haga rollback completo.
+                // @Transactional se encargará del rollback si se lanza una RuntimeException.
                 throw new RuntimeException("Error al guardar el perfil del paciente. El registro de usuario será revertido.", e);
             }
         }
@@ -108,11 +118,14 @@ public class Autenticacion {
     public Usuario loginUser(String usuario, String contrasena) {
         Usuario usuarioDb = usuarioRepositorio.findByUsuario(usuario);
         if (usuarioDb == null) {
+            logger.warn("Intento de login para usuario no existente: {}", usuario);
             return null;
         }
         if (passwordEncoder.matches(contrasena, usuarioDb.getContrasena())) {
+            logger.info("Login exitoso para usuario: {}", usuario);
             return usuarioDb;
         } else {
+            logger.warn("Intento de login fallido (contraseña incorrecta) para usuario: {}", usuario);
             return null;
         }
     }

@@ -74,22 +74,23 @@
         }
         .image-gallery-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Para 3 columnas fijas */
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Columnas responsivas */
             gap: 20px;
         }
         .image-gallery-grid .image-item {
             background-color: #eef1f5;
-            height: 180px;
-            display: block; /* Para el tag <a> que contiene la imagen */
+            aspect-ratio: 1 / 1;
+            display: block;
             color: #555;
             border-radius: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             border: 1px solid #d8dde1;
             overflow: hidden;
             text-decoration: none;
-            position: relative; /* Para el texto superpuesto si se usa */
+            position: relative;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
         }
-         .image-gallery-grid .image-item:not(.placeholder-item):hover { /* Aplicar hover solo si NO es un placeholder */
+         .image-gallery-grid .image-item:not(.placeholder-item):hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 5px 15px rgba(0,0,0,0.12);
             cursor: pointer;
@@ -101,37 +102,25 @@
             display: block;
         }
 
-        /* NUEVOS ESTILOS PARA LOS PLACEHOLDERS */
         .image-gallery-grid .placeholder-item {
-            /* Hereda altura, borde, sombra de .image-item */
-            background-color: #e9ecef; /* Gris claro para el fondo del placeholder */
-            display: flex; /* Para centrar el texto dentro del placeholder */
+            background-color: #e9ecef;
+            display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            color: #6c757d; /* Color del texto del placeholder */
+            color: #6c757d;
             font-size: 1em;
-            cursor: default; /* Para indicar que no es interactivo como una imagen real */
+            cursor: default;
+            aspect-ratio: 1 / 1;
         }
         .image-gallery-grid .placeholder-item:hover {
-            transform: none; /* No aplicar efecto de elevación a los placeholders */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Mantener la sombra base */
+            transform: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         }
-        .placeholder-text {
-            /* El texto se centra por flexbox en .placeholder-item */
-        }
+        .placeholder-text { }
+        .error-message-galeria { color: red; background-color: #ffebeb; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom:15px; text-align: center;}
 
-        /* Mensaje por si se decide no mostrar placeholders y volver al mensaje original */
-        .no-images-message {
-            text-align: center;
-            font-size: 1.1em;
-            color: #777;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px dashed #ddd;
-            border-radius: 6px;
-        }
-        .footer { /* Copiado de dashboard-medico.html */
+        .footer {
             text-align: center; padding: 20px; background-color: #343a40;
             color: white; font-size: 0.9em; margin-top: auto;
         }
@@ -148,6 +137,10 @@
 <main class="medico-content-area">
     <h1 class="content-title">Galería Principal de Imágenes</h1>
 
+    <div th:if="${errorMessageGalería}" class="error-message-galeria">
+        <p th:text="${errorMessageGalería}"></p>
+    </div>
+
     <div class="image-gallery-grid">
         <th:block th:if="${imagenesPrincipales != null and not #lists.isEmpty(imagenesPrincipales)}">
             <a th:each="imagen : ${imagenesPrincipales}"
@@ -156,13 +149,14 @@
                class="image-item"
                th:title="${'Ver imagen completa: ' + imagen.rutaArchivo}">
                 <img th:src="@{/imagenes/view/{filename}(filename=${imagen.rutaArchivo})}"
-                     th:alt="${'Imagen ID ' + imagen.id}"/>
+                     th:alt="${'Imagen ID ' + imagen.id + ' - Paciente: ' + (imagen.paciente != null ? imagen.paciente.nombre : 'N/A')}"/>
             </a>
         </th:block>
 
-        <th:block th:if="${imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)}">
+        <th:block th:if="${(imagenesPrincipales == null or #lists.isEmpty(imagenesPrincipales)) and errorMessageGalería == null}">
             <th:block th:each="i : ${#numbers.sequence(1, 6)}">
-                <div class="image-item placeholder-item"> <span class="placeholder-text" th:text="'Imagen ' + ${i}">Imagen X</span>
+                <div class="image-item placeholder-item">
+                    <span class="placeholder-text" th:text="'Imagen ' + ${i}">Imagen X</span>
                 </div>
             </th:block>
         </th:block>
@@ -174,7 +168,7 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-        // Script para activar el enlace de navegación correcto (similar al de dashboard-medico.html)
+        // Script para activar el enlace de navegación correcto (se mantiene igual que en respuestas anteriores)
         document.addEventListener('DOMContentLoaded', function() {
             var currentPath = /*[[${requestURI}]]*/ window.location.pathname;
             var navLinks = document.querySelectorAll('.medico-main-nav ul li');
@@ -184,30 +178,28 @@
                 var anchor = li.querySelector('a:not(.dropbtn)');
                 var dropdownButton = li.querySelector('a.dropbtn');
 
-                if (dropdownButton) {
-                    var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+                 if (dropdownButton) {
                     var isActiveInDropdown = false;
-                    var subLinks = li.querySelectorAll('.dropdown-content a');
-                    subLinks.forEach(function(subLink) {
-                        var subLinkHref = subLink.getAttribute('href');
-                        if (subLinkHref && (currentPath === subLinkHref || currentPath.startsWith(subLinkHref.split("?")[0]))) {
-                           isActiveInDropdown = true;
-                        }
-                    });
+                    var mainDropdownLinkHref = dropdownButton.getAttribute('href');
 
-                    if (isActiveInDropdown) {
-                         li.classList.add('active');
+                    if (mainDropdownLinkHref && (currentPath === mainDropdownLinkHref || (mainDropdownLinkHref !== '/' && currentPath.startsWith(mainDropdownLinkHref)))) {
+                        isActiveInDropdown = true;
                     } else {
-                         if (dropdownText === 'Galería' && currentPath.startsWith('/medico/galeria')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Pacientes' && currentPath.startsWith('/medico/pacientes')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Reportes' && currentPath.startsWith('/medico/reportes')) {
-                            li.classList.add('active');
-                         } else if (dropdownText === 'Historial' && currentPath.startsWith('/medico/historial')) {
-                            li.classList.add('active');
-                         }
+                        var dropdownText = (dropdownButton.textContent || dropdownButton.innerText).trim();
+                        var parentCategoryPath = null;
+                        if (dropdownText === 'Galería') parentCategoryPath = '/medico/galeria';
+                        else if (dropdownText === 'Pacientes') parentCategoryPath = '/medico/pacientes';
+                        else if (dropdownText === 'Reportes') parentCategoryPath = '/medico/reportes';
+                        else if (dropdownText === 'Historial') parentCategoryPath = '/medico/historial';
+
+                        if (parentCategoryPath && currentPath.startsWith(parentCategoryPath)) {
+                            isActiveInDropdown = true;
+                        }
                     }
+                     if (isActiveInDropdown) {
+                         li.classList.add('active');
+                     }
+
                 } else if (anchor) {
                     var linkPath = anchor.getAttribute('href');
                     if (linkPath && (currentPath === linkPath || (linkPath === '/medico/dashboard' && (currentPath === '/medico/' || currentPath.startsWith('/medico/dashboard'))))) {

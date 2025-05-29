@@ -1,26 +1,52 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Cargar Imagen</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <style>
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input[type="file"], input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button[type="submit"] { background-color: #0056b3; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+        button[type="submit"]:hover { background-color: #004494; }
+        .success-message { color: green; background-color: #e6ffed; border: 1px solid #b7ebc9; padding: 10px; border-radius: 4px; margin-bottom:15px; text-align: center;}
+        .error-message { color: red; background-color: #ffebeb; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom:15px; text-align: center;}
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #0056b3; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .form-group { margin-bottom: 1.5rem; }
+    </style>
 </head>
 <body>
 <div class="container">
     <h2>Cargar Nueva Imagen de Lesión</h2>
     <p>
-        <a th:href="${dashboardReturnUrl ?: '/'}"
-           th:text="${dashboardReturnUrl != null && #strings.containsIgnoreCase(dashboardReturnUrl, 'medico')} ? 'Volver al Dashboard del Médico' : 'Volver al Dashboard del Paciente'">
+        <a th:href="${dashboardReturnUrl ?: '/'}" class="back-link"
+           th:text="${#strings.containsIgnoreCase(dashboardReturnUrl, 'medico')} ? 'Volver al Dashboard del Médico' : 'Volver al Dashboard del Paciente'">
             Volver al Dashboard
         </a>
     </p>
-    <div th:if="${successMessage}" class="success-message">
-        <p th:text="${successMessage}"></p>
+
+    <div th:if="${successUploadMessage != null and !#strings.isEmpty(successUploadMessage)}" class="success-message">
+        <p th:text="${successUploadMessage}"></p>
     </div>
-    <div th:if="${errorMessage}" class="error-message">
+    <div th:if="${errorUploadMessage != null and !#strings.isEmpty(errorUploadMessage)}" class="error-message">
+        <p th:text="${errorUploadMessage}"></p>
+    </div>
+
+    <div th:if="${errorMessage != null and !#strings.isEmpty(errorMessage) and (errorUploadMessage == null or #strings.isEmpty(errorUploadMessage))}" class="error-message">
         <p th:text="${errorMessage}"></p>
     </div>
+
+
     <form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
-        <div>
+        <div class="form-group" th:if="${userRole == 'MEDICO'}">
+            <label for="pacienteIdentificacion">Identificación del Paciente:</label>
+            <input type="text" id="pacienteIdentificacion" name="pacienteIdentificacion"
+                   placeholder="Ingrese la identificación del paciente" required />
+        </div>
+
+        <div class="form-group">
             <label for="file">Seleccionar imagen:</label>
             <input type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required />
         </div>

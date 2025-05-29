@@ -8,6 +8,8 @@
         .error-message { color: red; }
         .error-text { color: red; font-size: 0.9em; }
         .success-message { color: green; }
+        .form-field { margin-bottom: 15px; } /* Añadido para espaciado */
+        label { display: block; margin-bottom: 5px; } /* Añadido para mejor visualización de etiquetas */
     </style>
 </head>
 <body>
@@ -21,44 +23,34 @@
         <p th:text="${successMessage}"></p>
     </div>
 
-    <form id="registrationForm" method="POST" th:action="@{/registro}" th:object="${usuarioForm}">
-        <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
-            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Errores globales</p>
-        </div>
+    <form id="registrationForm" method="POST" th:action="@{/registro}" th:object="${usuarioForm}"> <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Errores globales</p>
+    </div>
 
-        <div>
+        <div class="form-field">
             <label for="nombre">Nombre Completo:</label>
-            <input type="text" id="nombre" th:field="*{nombre}" required/>
-            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="error-text"></span>
+            <input type="text" id="nombre" th:field="*{nombre}" required/> <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="error-text"></span>
         </div>
-        <div>
+        <div class="form-field">
             <label for="usuarioInput">Nombre de Usuario:</label>
-            <input type="text" id="usuarioInput" th:field="*{usuario}" required/>
-            <span th:if="${#fields.hasErrors('usuario')}" th:errors="*{usuario}" class="error-text"></span>
+            <input type="text" id="usuarioInput" th:field="*{usuario}" required/> <span th:if="${#fields.hasErrors('usuario')}" th:errors="*{usuario}" class="error-text"></span>
         </div>
-        <div>
+        <div class="form-field">
             <label for="email">Email:</label>
-            <input type="email" id="email" th:field="*{email}" required/>
-            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></span>
+            <input type="email" id="email" th:field="*{email}" required/> <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></span>
         </div>
-        <div>
+        <div class="form-field">
             <label for="contrasena">Contraseña:</label>
-            <input type="password" id="contrasena" th:field="*{contrasena}" required/>
-            <span th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="error-text"></span>
+            <input type="password" id="contrasena" th:field="*{contrasena}" required/> <span th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="error-text"></span>
         </div>
-        <div>
+        <div class="form-field">
             <label for="rol">Soy un:</label>
-            <select id="rol" th:field="*{rol}">
-                <option value="PACIENTE">Paciente</option>
-                <option value="MEDICO">Médico</option>
-            </select>
+            <select id="rol" th:field="*{rol}" onchange="toggleIdentificacionField()"> <option value="PACIENTE">Paciente</option> <option value="MEDICO">Médico</option> </select>
             <span th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}" class="error-text"></span>
         </div>
 
-        <div>
-            <label for="identificacionPaciente">Identificación (solo si es Paciente):</label>
-            <input type="text" id="identificacionPaciente" th:field="*{identificacionPaciente}"/>
-        </div>
+        <div class="form-field" id="identificacionPacienteDiv"> <label for="identificacionPaciente">Identificación (solo si es Paciente):</label>
+            <input type="text" id="identificacionPaciente" th:field="*{identificacionPaciente}"/> </div>
 
         <div>
             <button type="submit">Registrar</button>
@@ -66,5 +58,23 @@
     </form>
     <p>¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión aquí</a></p>
 </div>
+
+<script>
+    function toggleIdentificacionField() {
+        var rolSelect = document.getElementById('rol');
+        var identificacionDiv = document.getElementById('identificacionPacienteDiv');
+        var identificacionInput = document.getElementById('identificacionPaciente');
+        if (rolSelect.value === 'PACIENTE') {
+            identificacionDiv.style.display = 'block';
+            identificacionInput.required = true; // Hacerlo requerido si es paciente
+        } else {
+            identificacionDiv.style.display = 'none';
+            identificacionInput.required = false; // No requerido si no es paciente
+            identificacionInput.value = ''; // Limpiar el campo si se cambia de rol
+        }
+    }
+    // Llamar a la función al cargar la página para establecer el estado inicial
+    document.addEventListener('DOMContentLoaded', toggleIdentificacionField);
+</script>
 </body>
 </html>

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Entity
-@Table(name = "pacientes")
+@Table(name = "pacientes", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"identificacion"}, name = "uk_paciente_identificacion")
+})
 public class Paciente {
 
     @Id
@@ -21,6 +23,10 @@ public class Paciente {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Sexo sexo;
+
+    // NUEVO CAMPO PARA IDENTIFICACIÓN
+    @Column(name = "identificacion", unique = true, nullable = true, length = 50) // Nullable si un paciente puede ser creado por un médico sin ser aún un usuario. Ajustar según lógica.
+    private String identificacion;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
@@ -43,7 +49,7 @@ public class Paciente {
 
     public Paciente() {}
 
-    // Getters y Setters (los que ya tienes)
+    // Getters y Setters (existentes)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }
@@ -65,7 +71,11 @@ public class Paciente {
     public List<HistorialLesionPrevia> getHistorialLesionesPrevias() { return historialLesionesPrevias; }
     public void setHistorialLesionesPrevias(List<HistorialLesionPrevia> historialLesionesPrevias) { this.historialLesionesPrevias = historialLesionesPrevias; }
 
-    // NUEVO O ACTUALIZADO: Método toString()
+    // GETTER Y SETTER PARA IDENTIFICACIÓN
+    public String getIdentificacion() { return identificacion; }
+    public void setIdentificacion(String identificacion) { this.identificacion = identificacion; }
+
+
     @Override
     public String toString() {
         return "Paciente{" +
@@ -73,6 +83,7 @@ public class Paciente {
                 ", nombre='" + nombre + '\'' +
                 ", edad=" + edad +
                 ", sexo=" + sexo +
+                ", identificacion='" + identificacion + '\'' +
                 ", usuarioId=" + (usuario != null ? usuario.getId() : "null") +
                 '}';
     }
