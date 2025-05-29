@@ -1,9 +1,9 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email; // Importa Jakarta Bean Validation Email
-import jakarta.validation.constraints.NotBlank; // Importa Jakarta Bean Validation NotBlank
-import jakarta.validation.constraints.Size;   // Importa Jakarta Bean Validation Size
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "usuarios")
@@ -14,32 +14,36 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long id;
 
-    @NotBlank(message = "El nombre de usuario no puede estar vacío") // Añadido
-    @Size(max = 50, message = "El nombre de usuario no puede exceder los 50 caracteres") // Añadido
+    @NotBlank(message = "El nombre de usuario no puede estar vacío")
+    @Size(max = 50, message = "El nombre de usuario no puede exceder los 50 caracteres")
     @Column(name = "usuario", unique = true, nullable = false, length = 50)
     private String usuario;
 
-    @NotBlank(message = "La contraseña no puede estar vacía") // Añadido
+    @NotBlank(message = "La contraseña no puede estar vacía")
     @Column(name = "contrasena", nullable = false)
     private String contrasena;
 
-    @NotBlank(message = "El rol no puede estar vacío") // Añadido
+    @NotBlank(message = "El rol no puede estar vacío")
     @Column(name = "rol", nullable = false, length = 20)
     private String rol;
 
-    @NotBlank(message = "El nombre completo no puede estar vacío") // Añadido
-    @Size(max = 100, message = "El nombre completo no puede exceder los 100 caracteres") // Añadido
+    @NotBlank(message = "El nombre completo no puede estar vacío")
+    @Size(max = 100, message = "El nombre completo no puede exceder los 100 caracteres")
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @NotBlank(message = "El email no puede estar vacío") // Añadido
-    @Email(message = "Debe ser una dirección de email válida") // Añadido
-    @Size(max = 100, message = "El email no puede exceder los 100 caracteres") // Añadido
+    @NotBlank(message = "El email no puede estar vacío")
+    @Email(message = "Debe ser una dirección de email válida")
+    @Size(max = 100, message = "El email no puede exceder los 100 caracteres")
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Paciente perfilPaciente;
+
+    // CAMPO TRANSITORIO PARA LA IDENTIFICACIÓN DEL PACIENTE EN EL FORMULARIO DE REGISTRO
+    @Transient
+    private String identificacionPaciente;
 
 
     public Usuario() {}
@@ -74,6 +78,9 @@ public class Usuario {
     public Paciente getPerfilPaciente() { return perfilPaciente; }
     public void setPerfilPaciente(Paciente perfilPaciente) { this.perfilPaciente = perfilPaciente; }
 
+    // Getter y Setter para el campo transitorio
+    public String getIdentificacionPaciente() { return identificacionPaciente; }
+    public void setIdentificacionPaciente(String identificacionPaciente) { this.identificacionPaciente = identificacionPaciente; }
 
     @Override
     public String toString() {
@@ -85,6 +92,7 @@ public class Usuario {
                 ", rol='" + rol + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", email='" + email + '\'' +
+                // No incluir identificacionPaciente aquí ya que es transitorio y específico del form
                 '}';
     }
 }

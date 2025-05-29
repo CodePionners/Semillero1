@@ -7,15 +7,18 @@
 <body>
 <div class="container">
     <h2>Cargar Nueva Imagen de Lesión</h2>
-    <p><a th:href="@{/dashboard-paciente}">Volver al Dashboard</a></p>
-
+    <p>
+        <a th:href="${dashboardReturnUrl ?: '/'}"
+           th:text="${dashboardReturnUrl != null && #strings.containsIgnoreCase(dashboardReturnUrl, 'medico')} ? 'Volver al Dashboard del Médico' : 'Volver al Dashboard del Paciente'">
+            Volver al Dashboard
+        </a>
+    </p>
     <div th:if="${successMessage}" class="success-message">
         <p th:text="${successMessage}"></p>
     </div>
     <div th:if="${errorMessage}" class="error-message">
         <p th:text="${errorMessage}"></p>
     </div>
-
     <form method="POST" th:action="@{/imagenes/upload}" enctype="multipart/form-data">
         <div>
             <label for="file">Seleccionar imagen:</label>

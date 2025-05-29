@@ -133,12 +133,27 @@
             display:none; width:70px; height:70px; background-color:#ddd;
             border-radius:50%; margin: 0 auto 10px auto;
         }
-        .upload-section-stats button {
-            background-color: #f0f0f0; color: #333; border: 1px solid #ccc;
-            padding: 12px 20px; border-radius: 5px; font-size: 1em;
-            cursor: pointer; font-weight: 500; transition: background-color 0.3s;
+        /* ##### CSS PARA EL NUEVO ENLACE CON ESTILO ##### */
+        .upload-section-stats .upload-button-styled-as-link {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none; /* Eliminar subrayado del enlace */
+            display: inline-block; /* Se comporta como un botón */
+            text-align: center;
+            transition: background-color 0.3s;
         }
-        .upload-section-stats button:hover { background-color: #e0e0e0; }
+        .upload-section-stats .upload-button-styled-as-link:hover {
+            background-color: #e0e0e0;
+            color: #333; /* Asegurar que el color del texto permanezca al pasar el ratón */
+        }
+         /* ##### FIN DEL CSS PARA EL NUEVO ENLACE CON ESTILO ##### */
+
         /* === FIN: Estilos CSS del contenido de Estadísticas === */
 
         .footer {
@@ -237,8 +252,7 @@
             <div class="upload-section-stats">
                 <img th:src="@{/icons/cloud-upload.png}" alt="Subir Imagen"
                      onerror="this.style.display='none'; this.parentElement.querySelector('.icon-placeholder-cloud').style.display='block';"/>
-                <span class="icon-placeholder-cloud"></span>
-                <button type="button" onclick="alert('Funcionalidad placeholder.');" class="placeholder-link">Subir nueva imagen</button>
+                <span class="icon-placeholder-cloud" style="display:none;"></span> <a th:href="@{/medico/imagenes/cargar-para-paciente}" class="upload-button-styled-as-link">Subir nueva imagen</a>
             </div>
         </aside>
     </div>

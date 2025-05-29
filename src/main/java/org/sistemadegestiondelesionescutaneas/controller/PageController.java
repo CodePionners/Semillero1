@@ -50,12 +50,11 @@ public class PageController {
                     return "redirect:/imagenes/historial";
                 } else if ("ROLE_MEDICO".equals(role)) {
                     logger.info("User '{}' is ROLE_MEDICO, forwarding to /medico/dashboard (Inicio - Estadisticas)", username);
-                    // Ya no se redirige, se reenvía para que el controlador del dashboard maneje la requestURI
                     return "forward:/medico/dashboard";
                 } else if ("ROLE_ADMIN".equals(role)) {
                     logger.info("User '{}' is ROLE_ADMIN, returning 'dashboard-admin' view. Consider forwarding to an admin controller.", username);
-                    model.addAttribute("requestURI", "/admin/dashboard"); // Simular URI para admin dashboard si es necesario
-                    return "dashboard-admin"; // Considera un controlador específico para admin
+                    model.addAttribute("requestURI", "/admin/dashboard");
+                    return "dashboard-admin";
                 }
             }
             logger.warn("User '{}' authenticated but has an unhandled role. Redirecting to /login.", username);
@@ -75,7 +74,6 @@ public class PageController {
             String requestURI = request.getRequestURI();
             medicoLogger.info("Accessing Medico Dashboard (Inicio - Contenido de Estadísticas) ({}).", requestURI);
             model.addAttribute("requestURI", requestURI);
-            // dashboard-medico.html ahora contiene el layout de estadísticas para la vista de Inicio.
             return "dashboard-medico";
         }
 
@@ -84,27 +82,28 @@ public class PageController {
             String uri = request.getRequestURI();
             medicoLogger.info("Accessing Medico Galeria Principal ({}).", uri);
             model.addAttribute("requestURI", uri);
-            // Nueva plantilla para la galería de imágenes principal.
-            return "medico-galeria-principal"; // Esta es la vista cuya apariencia CSS se modificó.
+            return "medico-galeria-principal";
         }
 
+        // ##### MÉTODO MODIFICADO #####
         @GetMapping("/medico/imagenes/cargar-para-paciente")
         public String medicoCargarImagen(Model model, HttpServletRequest request) {
             String uri = request.getRequestURI();
-            model.addAttribute("requestURI", uri);
-            medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            // Implementa la vista o redirige según sea necesario.
-            // Por ejemplo, podría ser un modal en otra página o una página dedicada.
-            // Si es un placeholder, redirigir a una vista relevante.
-            return "forward:/medico/dashboard"; // O a una página específica de carga de imágenes.
+            medicoLogger.info("Accediendo al formulario de Cargar Imagen del Médico ({}).", uri); // Registro actualizado
+            model.addAttribute("requestURI", uri); // Para la pestaña activa en la navegación, si cargar-imagen.html usa la misma navegación
+            // Añadir una URL de retorno para el enlace "Volver al Dashboard" en cargar-imagen.html
+            model.addAttribute("dashboardReturnUrl", "/medico/dashboard");
+            // model.addAttribute("uploaderRole", "MEDICO"); // Opcional: si cargar-imagen.html necesita adaptar la UI para el médico
+            return "cargar-imagen"; // Sirve la plantilla cargar-imagen.html
         }
+        // ##### FIN DEL MÉTODO MODIFICADO #####
 
         @GetMapping("/medico/galeria/info-general")
         public String medicoGaleriaInfoGeneral(Model model, HttpServletRequest request) {
             String uri = request.getRequestURI();
             model.addAttribute("requestURI", uri);
             medicoLogger.info("Accessing {}. Placeholder - implement view or redirect.", uri);
-            return "forward:/medico/dashboard"; // O a una página de información general de galería.
+            return "forward:/medico/dashboard";
         }
 
         @GetMapping("/medico/pacientes/lista")
@@ -120,9 +119,7 @@ public class PageController {
             String requestURI = request.getRequestURI();
             medicoLogger.info("Accessing Medico Pacientes Agregar Form ({}). Placeholder.", requestURI);
             model.addAttribute("requestURI", requestURI);
-            // Deberías tener una plantilla para esto o redirigir.
-            // "redirect:/medico/pacientes/lista" es una opción si no está implementado.
-            return "medico-pacientes-lista"; // O una plantilla como "medico-pacientes-agregar"
+            return "medico-pacientes-lista";
         }
 
         @GetMapping("/medico/reportes/generar")
@@ -130,7 +127,7 @@ public class PageController {
             String requestURI = request.getRequestURI();
             medicoLogger.info("Accessing Medico Reportes Generar ({}).", requestURI);
             model.addAttribute("requestURI", requestURI);
-            return "medico-reportes-generar"; // Plantilla para generar reportes
+            return "medico-reportes-generar";
         }
 
         @GetMapping("/medico/reportes/ver-generados")
@@ -138,8 +135,7 @@ public class PageController {
             String requestURI = request.getRequestURI();
             medicoLogger.info("Accessing Medico Reportes Ver Generados ({}). Placeholder.", requestURI);
             model.addAttribute("requestURI", requestURI);
-            // Implementa esta vista. Podría ser similar a 'medico-reportes-generar' pero para visualización.
-            return "forward:/medico/dashboard"; // O una plantilla "medico-reportes-ver"
+            return "forward:/medico/dashboard";
         }
 
 
@@ -148,7 +144,6 @@ public class PageController {
             String requestURI = request.getRequestURI();
             model.addAttribute("requestURI", requestURI);
             medicoLogger.info("Accessing Medico Historial Consultas ({}), showing medico-pacientes-lista.", requestURI);
-            // CORREGIDO: Devolver la vista deseada en lugar de reenviar a la misma URL.
             return "medico-pacientes-lista";
         }
     }

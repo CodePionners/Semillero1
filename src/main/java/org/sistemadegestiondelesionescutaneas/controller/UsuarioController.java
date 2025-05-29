@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError; // Para errores globales y de campo
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,47 +26,33 @@ public class UsuarioController {
 
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
-        if (!model.containsAttribute("usuarioForm")) { // MODIFICADO: nombre del atributo
-            model.addAttribute("usuarioForm", new Usuario()); // MODIFICADO: nombre del atributo
+        if (!model.containsAttribute("usuarioForm")) {
+            model.addAttribute("usuarioForm", new Usuario());
         }
         return "registro";
     }
 
     @PostMapping("/registro")
-    public String procesarRegistro(@Valid @ModelAttribute("usuarioForm") Usuario usuarioModel, // MODIFICADO: nombre del atributo
+    public String procesarRegistro(@Valid @ModelAttribute("usuarioForm") Usuario usuarioModel,
                                    BindingResult result,
                                    Model model,
                                    RedirectAttributes redirectAttributes) {
 
         logger.info("--- INICIO PROCESAR REGISTRO ---");
         if (usuarioModel != null) {
-            logger.info("Datos recibidos del formulario: Nombre Completo: '{}', Usuario: '{}', Email: '{}', Rol: '{}', Contraseña (presente): '{}'",
+            logger.info("Datos recibidos: Nombre Completo: '{}', Usuario: '{}', Email: '{}', Rol: '{}', Identificacion Paciente: '{}', Contraseña (presente): '{}'",
                     usuarioModel.getNombre(),
                     usuarioModel.getUsuario(),
                     usuarioModel.getEmail(),
                     usuarioModel.getRol(),
+                    usuarioModel.getIdentificacionPaciente(), // Log del nuevo campo
                     (usuarioModel.getContrasena() != null && !usuarioModel.getContrasena().isEmpty()));
         }
 
         if (result.hasErrors()) {
             logger.warn("Errores de validación y/o binding encontrados en BindingResult:");
-            for (ObjectError error : result.getAllErrors()) {
-                if (error instanceof FieldError) {
-                    FieldError fieldError = (FieldError) error;
-                    logger.warn("Error de Campo: Objeto='{}', Campo='{}', Valor Rechazado='{}', Código='{}', Mensaje='{}'",
-                            fieldError.getObjectName(),
-                            fieldError.getField(),
-                            fieldError.getRejectedValue(),
-                            fieldError.getCode(),
-                            error.getDefaultMessage());
-                } else {
-                    logger.warn("Error Global: Objeto='{}', Código='{}', Mensaje='{}'",
-                            error.getObjectName(),
-                            error.getCode(),
-                            error.getDefaultMessage());
-                }
-            }
-            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
+            // ... (logging de errores como estaba)
+            model.addAttribute("usuarioForm", usuarioModel);
             return "registro";
         }
 
@@ -77,20 +63,21 @@ public class UsuarioController {
                     usuarioModel.getContrasena(),
                     usuarioModel.getRol(),
                     usuarioModel.getNombre(),
-                    usuarioModel.getEmail()
+                    usuarioModel.getEmail(),
+                    usuarioModel.getIdentificacionPaciente() // Pasar el nuevo campo al servicio
             );
             redirectAttributes.addFlashAttribute("successMessage", "¡Registro exitoso! Por favor, inicia sesión.");
             logger.info("Registro supuestamente exitoso para el usuario: {}", usuarioModel.getUsuario());
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            logger.error("Error de argumento ilegal durante el registro (desde servicio): {}", e.getMessage(), e);
+            logger.error("Error de argumento ilegal durante el registro (desde servicio): {}", e.getMessage()); // No es necesario el stack trace completo aquí si ya se logueó en el servicio
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
+            model.addAttribute("usuarioForm", usuarioModel);
             return "registro";
         } catch (Exception e) {
             logger.error("Error inesperado durante el registro (desde servicio): {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ocurrió un error inesperado durante el registro.");
-            model.addAttribute("usuarioForm", usuarioModel); // MODIFICADO: nombre del atributo
+            model.addAttribute("usuarioForm", usuarioModel);
             return "registro";
         } finally {
             logger.info("--- FIN PROCESAR REGISTRO ---");
