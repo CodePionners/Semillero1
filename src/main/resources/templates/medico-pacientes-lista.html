@@ -6,7 +6,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        /* COPIA AQUÍ los estilos de .medico-header, .medico-main-nav, .footer de tu style.css o dashboard-medico.html */
         .medico-header { background-color: #0056b3; padding: 10px 25px; color: white; display: flex; justify-content: flex-end; align-items: center; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .medico-header .user-info strong { margin-right: 15px; }
         .medico-header .logout-form button { background-color: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.95em; font-weight: 500; }
@@ -15,116 +14,35 @@
         .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn { display: block; color: #0056b3; text-align: center; padding: 14px 20px; text-decoration: none; font-weight: 500; border: none; background: none; cursor: pointer; font-size: 1em; }
         .medico-main-nav ul li a:hover, .medico-main-nav ul li.active > a { background-color: #fff; color: #003875; border-top: 3px solid #0056b3; border-left: 1px solid #ced4da; border-right: 1px solid #ced4da; }
         .footer { text-align: center; padding: 20px; background-color: #343a40; color: white; font-size: 0.9em; margin-top: auto; }
-
-        /* Estructura principal para la página de pacientes */
-        .pacientes-page-content-area { /* Contenedor general de la página */
-            flex-grow: 1;
-            padding: 20px 25px;
-            max-width: 1200px; /* O un ancho que se ajuste a tu diseño */
-            margin: 20px auto; /* Centrar */
-        }
-
-        .main-content-box { /* Recuadro blanco principal */
-            background-color: #fff;
-            padding: 25px 30px; /* Padding interno */
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 25px; /* Espacio debajo de la caja */
-        }
-
-        .section-title { /* Para títulos como "Gestión de Pacientes" */
-            font-size: 1.8em;
-            color: #0056b3;
-            margin-top: 0;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        /* Sub-pestañas dentro de la content-box (Datos del paciente) */
-        .pacientes-sub-tabs {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 0;
-        }
-        .pacientes-sub-tabs .sub-tab-link {
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #0056b3;
-            font-weight: 500;
-            font-size: 1.05em;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -1px;
-        }
-        .pacientes-sub-tabs .sub-tab-link.active,
-        .pacientes-sub-tabs .sub-tab-link:hover {
-            color: #003875;
-            border-bottom-color: #0056b3;
-        }
-
-        /* Formulario de búsqueda */
-        .search-form-container {
-             margin-bottom: 25px;
-        }
-        .search-form-pacientes {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-        }
+        .pacientes-page-content-area { flex-grow: 1; padding: 20px 25px; max-width: 1200px; margin: 20px auto; }
+        .main-content-box { background-color: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .section-title { font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e9ecef; }
+        .pacientes-sub-tabs { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #dee2e6; padding-bottom: 0; }
+        .pacientes-sub-tabs .sub-tab-link { padding: 10px 15px; text-decoration: none; color: #0056b3; font-weight: 500; font-size: 1.05em; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+        .pacientes-sub-tabs .sub-tab-link.active, .pacientes-sub-tabs .sub-tab-link:hover { color: #003875; border-bottom-color: #0056b3; }
+        .search-form-container { margin-bottom: 25px; }
+        .search-form-pacientes { display: flex; align-items: center; gap: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef; }
         .search-form-pacientes label { font-weight: bold; color: #333; }
-        .search-form-pacientes input[type="text"] {
-            padding: 10px; border: 1px solid #ced4da; border-radius: 4px;
-            font-size: 1em; flex-grow: 1;
-        }
-        .search-form-pacientes button {
-            padding: 10px 20px; background-color: #0056b3; color: white; border: none;
-            border-radius: 4px; cursor: pointer; font-weight: 500;
-        }
+        .search-form-pacientes input[type="text"] { padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 1em; flex-grow: 1; }
+        .search-form-pacientes button { padding: 10px 20px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
         .search-form-pacientes button:hover { background-color: #004494; }
-
-        /* Mensajes */
         .message { padding: 10px 15px; border-radius: 4px; margin: 15px 0; }
         .success-message { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
         .error-message { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
         .info-message { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
-
-        /* Formulario de Detalles del Paciente */
         .patient-details-form { margin-top: 20px; }
         .patient-details-form hr { border: 0; border-top: 1px solid #e9ecef; margin: 20px 0; }
         .patient-details-form h3 { color: #0056b3; margin-bottom: 15px; font-size: 1.3em; }
         .patient-details-form .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px 20px; }
         .patient-details-form .form-group { display: flex; flex-direction: column; }
         .patient-details-form label { margin-bottom: 5px; font-weight: 500; color: #495057; font-size: 0.9em; }
-        .patient-details-form input[type="text"], .patient-details-form input[type="number"], .patient-details-form select { padding: 9px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em; background-color: #fff; }
+        .patient-details-form input[type="text"], .patient-details-form input[type="number"], .patient-details-form select, .patient-details-form textarea { padding: 9px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em; background-color: #fff; box-sizing: border-box; width: 100%;}
         .patient-details-form input[readonly] { background-color: #e9ecef; }
-        .patient-details-form .form-actions { margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 10px;} /* MODIFICADO para flex y gap */
+        .patient-details-form .form-actions { margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 10px;}
         .patient-details-form .save-button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; }
         .patient-details-form .save-button:hover { background-color: #218838; }
-        /* Estilo para el botón de Ver Historial (puede ser similar a .save-button o .action-btn) */
-        .view-history-button {
-            padding: 10px 20px;
-            background-color: #007bff; /* Un color azul, por ejemplo */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none; /* Para que parezca botón si es un <a> */
-            font-size: inherit; /* Para que coincida con otros botones del formulario */
-        }
-        .view-history-button:hover {
-            background-color: #0056b3;
-        }
-
-
-        /* Eliminado el contenedor del botón de agregar paciente inferior */
-
+        .view-history-button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; text-decoration: none; font-size: inherit; }
+        .view-history-button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
@@ -135,7 +53,6 @@
 <main class="pacientes-page-content-area">
     <div class="main-content-box">
         <h1 class="section-title">Pacientes</h1>
-
         <div class="pacientes-sub-tabs">
             <a th:href="@{/medico/pacientes/lista}" class="sub-tab-link active">Datos del Paciente</a>
         </div>
@@ -150,7 +67,6 @@
 
         <div th:if="${successMessage}" class="message success-message" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="message error-message" th:text="${errorMessage}"></div>
-
         <div th:if="${searchMessage != null && (paciente == null || paciente.id == null)}" class="message info-message" th:text="${searchMessage}"></div>
 
         <div th:if="${paciente != null && paciente.id != null}" class="patient-details-form">
@@ -178,6 +94,21 @@
                         <select id="form-sexo" th:field="*{sexo}">
                             <option value="">Seleccione...</option>
                             <option th:each="s : ${sexos}" th:value="${s}" th:text="${s.descripcion}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-tipo-reporte">Tipo de Reporte Actual:</label>
+                        <select id="form-tipo-reporte" th:field="*{tipoReporteActual}">
+                            <option value="">Seleccione un tipo de reporte...</option>
+                            <option th:each="tr : ${tiposReporte}" th:value="${tr}" th:text="${tr.descripcion}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-diagnostico-predominante">Diagnóstico Predominante:</label>
+                        <select id="form-diagnostico-predominante" th:field="*{diagnosticoPredominante}">
+                            <option value="">Seleccione un diagnóstico...</option>
+                            <option th:each="diag : ${diagnosticos}" th:value="${diag}" th:text="${diag.descripcion}"></option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -215,6 +146,9 @@
                             <option th:each="afc : ${antecedentesCancer}" th:value="${afc}" th:text="${afc.descripcion}"></option>
                         </select>
                     </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"> <label for="form-motivoConsultaActual">Motivo de Consulta / Notas Adicionales:</label>
+                        <textarea id="form-motivoConsultaActual" th:field="*{motivoConsultaActual}" rows="3" placeholder="Ingrese notas o el motivo de esta actualización/consulta..."></textarea>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -230,8 +164,8 @@
         <div th:if="${(paciente == null || paciente.id == null) && identificacionBusquedaActual == null && searchMessage == null}" class="message info-message">
             <p>Realice una búsqueda por identificación para ver o editar los detalles de un paciente.</p>
         </div>
-
-    </div> </main>
+    </div>
+</main>
 
 <footer class="footer" th:insert="~{dashboard-medico :: footer}"></footer>
 <script th:inline="javascript" th:src="@{/js/medico-dashboard-nav.js}" defer></script>

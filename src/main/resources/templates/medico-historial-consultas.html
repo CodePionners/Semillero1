@@ -5,7 +5,6 @@
   <meta charset="UTF-8"/>
   <link rel="stylesheet" th:href="@{/css/style.css}"/>
   <style>
-    /* Copia aquí los estilos comunes del dashboard médico */
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
     .medico-header { background-color: #0056b3; padding: 10px 25px; color: white; display: flex; justify-content: flex-end; align-items: center; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .medico-header .user-info strong { margin-right: 15px; }
@@ -15,43 +14,30 @@
     .medico-main-nav ul li a, .medico-main-nav ul li .dropbtn { display: block; color: #0056b3; text-align: center; padding: 14px 20px; text-decoration: none; font-weight: 500; border: none; background: none; cursor: pointer; font-size: 1em; }
     .medico-main-nav ul li a:hover, .medico-main-nav ul li.active > a { background-color: #fff; color: #003875; border-top: 3px solid #0056b3; border-left: 1px solid #ced4da; border-right: 1px solid #ced4da; }
     .footer { text-align: center; padding: 20px; background-color: #343a40; color: white; font-size: 0.9em; margin-top: auto; }
-
-    /* Estilos para la página de Historial, similar a la imagen de "Historial General" */
-    .historial-page-content-area {
-        flex-grow: 1; padding: 25px; max-width: 1000px; margin: 20px auto; width: 90%;
-    }
-    .main-content-box {
-        background-color: #fff; padding: 25px 30px; border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .content-title {
-        font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 30px;
-        padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; text-align: center;
-    }
+    .historial-page-content-area { flex-grow: 1; padding: 25px; max-width: 1000px; margin: 20px auto; width: 90%; }
+    .main-content-box { background-color: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .content-title { font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; text-align: center; }
     .historial-table-container { margin-bottom: 30px; }
     .historial-table { width: 100%; border-collapse: collapse; }
-    .historial-table th, .historial-table td {
-        border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; font-size: 1em;
-    }
+    .historial-table th, .historial-table td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; font-size: 1em; }
     .historial-table th { background-color: #f8f9fa; color: #333; font-weight: 600; }
     .historial-table td { background-color: #fff; height: 45px; }
-
-    .action-buttons-container {
-        text-align: center; margin-top: 30px; margin-bottom: 20px;
-        display: flex; justify-content: center; gap: 15px; /* Para alinear botones */
-    }
-    .action-btn {
-        background-color: #e9f5ff; color: #0056b3; border: 1px solid #b8d7f7;
-        padding: 12px 25px; font-size: 1.1em; font-weight: 500; border-radius: 6px;
-        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
-        transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #d6eaf8; border-color: #0056b3;
-        box-shadow: 0 2px 6px rgba(0,86,179,0.15);
-    }
+    .action-buttons-container { text-align: center; margin-top: 30px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; }
+    .action-btn { background-color: #e9f5ff; color: #0056b3; border: 1px solid #b8d7f7; padding: 12px 25px; font-size: 1.1em; font-weight: 500; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s; }
+    .action-btn:hover { background-color: #d6eaf8; border-color: #0056b3; box-shadow: 0 2px 6px rgba(0,86,179,0.15); }
     .action-btn .icon { margin-right: 10px; font-size: 1.3em; }
-    /* No se usa más .placeholder-link para los botones activos de descarga */
+    .action-btn.disabled { /* Nuevo estilo para botones deshabilitados */
+        cursor: not-allowed;
+        opacity: 0.6;
+        background-color: #f8f9fa; /* Un color de fondo más tenue */
+        border-color: #dee2e6;
+        color: #6c757d;
+    }
+    .action-btn.disabled:hover { /* Evitar cambio de hover en deshabilitado */
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
   </style>
 </head>
 <body>
@@ -61,15 +47,20 @@
 
 <main class="historial-page-content-area">
   <div class="main-content-box">
-    <h1 class="content-title">Historial General</h1>
+    <h1 class="content-title">
+      Historial del Paciente:
+      <span th:if="${pacienteSeleccionado != null}" th:text="${pacienteSeleccionado.nombre + ' (' + pacienteSeleccionado.identificacion + ')'}"></span>
+      <span th:if="${pacienteSeleccionado == null}">General</span>
+    </h1>
 
     <div class="historial-table-container">
       <table class="historial-table">
         <thead>
         <tr>
           <th>Fecha</th>
-          <th>Evento</th>
-          <th>Consulta</th> <th>Estado</th>
+          <th>Tipo de Reporte</th>
+          <th>Diagnóstico</th>
+          <th>Notas Adicionales / Motivo</th>
         </tr>
         </thead>
         <tbody>
@@ -81,41 +72,32 @@
         </tr>
         <tr th:each="entrada : ${entradasHistorial}">
           <td th:text="${entrada.fechaHora != null ? #temporals.format(entrada.fechaHora, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
-          <td th:text="${entrada.evento}"></td>
-          <td th:text="${entrada.detalles != null ? #strings.abbreviate(entrada.detalles, 50) : 'N/A'}"></td>
-          <td th:text="${entrada.estado}"></td>
+          <td th:text="${entrada.tipoReporte != null ? entrada.tipoReporte.descripcion : 'N/A'}"></td>
+          <td th:text="${entrada.diagnostico != null ? entrada.diagnostico.descripcion : 'N/A'}"></td>
+          <td th:text="${entrada.detalles != null ? #strings.abbreviate(entrada.detalles, 70) : 'N/A'}"></td>
         </tr>
-        <tr th:if="${entradasHistorial == null and pacienteSeleccionado == null and infoMessage == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr th:if="${entradasHistorial == null and pacienteSeleccionado == null and infoMessage == null}"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="action-buttons-container">
       <a th:href="@{/medico/pacientes/lista}" class="action-btn">
-        <span class="icon">&#x1F50D;</span> Buscar Paciente
+        <span class="icon">&#x1F50D;</span> Buscar Otro Paciente
       </a>
 
-      <th:block th:if="${pacienteSeleccionado != null}">
-        <a th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id} + '/pdf'}"
-           class="action-btn"
-           title="Descargar Historial en PDF">
-          <span class="icon">&#x1F4E5;</span> Descargar PDF
-        </a>
-        <a th:href="@{'/medico/historial/descargar/' + ${pacienteSeleccionado.id} + '/csv'}"
-           class="action-btn"
-           title="Descargar Historial en CSV">
-          <span class="icon">&#x1F4E4;</span> Descargar CSV </a>
-      </th:block>
+      <a th:href="${pacienteSeleccionado != null ? '/medico/historial/descargar/' + pacienteSeleccionado.id + '/pdf' : '#'}"
+         th:classappend="${pacienteSeleccionado == null ? 'disabled' : ''}"
+         class="action-btn"
+         th:title="${pacienteSeleccionado != null ? 'Descargar Historial en PDF' : 'Seleccione un paciente para descargar su historial'}">
+        <span class="icon">&#x1F4E5;</span> Descargar PDF
+      </a>
 
-      <th:block th:if="${pacienteSeleccionado == null}">
-        <a href="#" class="action-btn" style="cursor:not-allowed; opacity:0.6;" title="Seleccione un paciente para descargar su historial">
-          <span class="icon">&#x1F4E5;</span> Descargar PDF
-        </a>
-        <a href="#" class="action-btn" style="cursor:not-allowed; opacity:0.6;" title="Seleccione un paciente para descargar su historial">
-          <span class="icon">&#x1F4E4;</span> Descargar CSV
-        </a>
-      </th:block>
+      <a th:href="${pacienteSeleccionado != null ? '/medico/historial/descargar/' + pacienteSeleccionado.id + '/csv' : '#'}"
+         th:classappend="${pacienteSeleccionado == null ? 'disabled' : ''}"
+         class="action-btn"
+         th:title="${pacienteSeleccionado != null ? 'Descargar Historial en CSV' : 'Seleccione un paciente para descargar su historial'}">
+        <span class="icon">&#x1F4E4;</span> Descargar CSV
+      </a>
     </div>
   </div>
 </main>

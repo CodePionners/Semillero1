@@ -1,63 +1,198 @@
 package org.sistemadegestiondelesionescutaneas.service;
 
+import org.sistemadegestiondelesionescutaneas.model.EntradaHistorial;
 import org.sistemadegestiondelesionescutaneas.model.Paciente;
 import org.springframework.stereotype.Service;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
-// Asegúrate de que esta clase sea un Bean de Spring si PageController espera que se inyecte.
-// Si no usas @Autowired en PageController para este servicio, puedes quitar @Service.
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment; // Corregido
+import com.itextpdf.layout.properties.UnitValue;     // Corregido
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException; // Asegúrate que esta importación esté presente
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime; // Añadido
+import java.time.format.DateTimeFormatter;
+import java.util.StringJoiner;
+
 @Service
 public class HistorialExportService {
 
-    /**
-     * Genera un archivo PDF del historial del paciente.
-     * ESTA ES UNA IMPLEMENTACIÓN DE RELLENO. Debes implementar la lógica real de generación de PDF.
-     * @param paciente El paciente para el cual generar el historial.
-     * @return Un ByteArrayInputStream que contiene los datos del PDF.
-     */
-    public ByteArrayInputStream generarHistorialPdf(Paciente paciente) {
-        // TODO: Implementar la lógica de generación de PDF aquí.
-        // Por ahora, se devuelve un stream vacío o se podría lanzar una excepción.
-        // Ejemplo: usar iText o Apache PDFBox.
-        System.err.println("ADVERTENCIA: generarHistorialPdf NO está implementado. Paciente: " + (paciente != null ? paciente.getNombre() : "null"));
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        String mensajePlaceholder = "Contenido del PDF para el paciente: " + (paciente != null ? paciente.getNombre() : "N/A") + "\n(Funcionalidad de PDF no implementada)";
-        // Esto es solo un placeholder para que compile y retorne algo.
-        // En una implementación real, usarías una librería de PDF para crear el contenido.
-        return new ByteArrayInputStream(mensajePlaceholder.getBytes(StandardCharsets.UTF_8));
+    public ByteArrayInputStream generarHistorialPdf(Paciente paciente) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PdfWriter writer = new PdfWriter(baos);
+             PdfDocument pdf = new PdfDocument(writer);
+             Document document = new Document(pdf)) {
+
+            if (paciente == null) {
+                document.add(new Paragraph("No se proporcionó información del paciente.").setTextAlignment(TextAlignment.CENTER));
+                return new ByteArrayInputStream(baos.toByteArray());
+            }
+
+            document.add(new Paragraph("Historial Clínico del Paciente")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setBold()
+                    .setFontSize(18)
+                    .setMarginBottom(10));
+
+            document.add(new Paragraph("Nombre: " + (paciente.getNombre() != null ? paciente.getNombre() : "N/A")).setMarginBottom(2));
+            document.add(new Paragraph("Identificación: " + (paciente.getIdentificacion() != null ? paciente.getIdentificacion() : "N/A")).setMarginBottom(2));
+            document.add(new Paragraph("Sexo: " + (paciente.getSexo() != null ? paciente.getSexo().getDescripcion() : "N/A")).setMarginBottom(2));
+            document.add(new Paragraph("Edad: " + (paciente.getEdad() != null ? paciente.getEdad().toString() + " años" : "N/A")).setMarginBottom(2));
+            document.add(new Paragraph("Fecha de Exportación: " + LocalDateTime.now().format(DATE_TIME_FORMATTER)).setMarginBottom(15));
+
+
+            if (paciente.getHistorial() != null && !paciente.getHistorial().isEmpty()) {
+                Table table = new Table(UnitValue.createPercentArray(new float[]{2f, 2.5f, 2.5f, 5f}));
+                table.setWidth(UnitValue.createPercentValue(100));
+
+                table.addHeaderCell(new Cell().add(new Paragraph("Fecha").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+                table.addHeaderCell(new Cell().add(new Paragraph("Tipo de Reporte").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+                table.addHeaderCell(new Cell().add(new Paragraph("Diagnóstico").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+                table.addHeaderCell(new Cell().add(new Paragraph("Notas Adicionales / Detalles Clínicos").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+
+                for (EntradaHistorial entrada : paciente.getHistorial()) {
+                    StringJoiner detallesClinicos = new StringJoiner("\n");
+                    if (paciente.getEdadEstimadaLesion() != null) {
+                        detallesClinicos.add("Edad Estimada Lesión: " + paciente.getEdadEstimadaLesion().getDescripcion());
+                    }
+                    if (paciente.getAreaCorporalAfectadaPredominante() != null) {
+                        detallesClinicos.add("Área Corporal: " + paciente.getAreaCorporalAfectadaPredominante().getDescripcion());
+                    }
+                    if (paciente.getTipoPielFitzpatrick() != null) {
+                        detallesClinicos.add("Tipo Piel: " + paciente.getTipoPielFitzpatrick().getDescripcion());
+                    }
+                    if (paciente.getTamanodeLesionGeneral() != null) {
+                        detallesClinicos.add("Tamaño Lesión: " + paciente.getTamanodeLesionGeneral().getDescripcion());
+                    }
+                    if (paciente.getAntecedentesFamiliaresCancer() != null) {
+                        detallesClinicos.add("Antecedentes Cáncer: " + paciente.getAntecedentesFamiliaresCancer().getDescripcion());
+                    }
+                    if (entrada.getDetalles() != null && !entrada.getDetalles().trim().isEmpty()) {
+                        detallesClinicos.add("Motivo/Notas Entrada: " + entrada.getDetalles());
+                    }
+
+                    table.addCell(new Cell().add(new Paragraph(entrada.getFechaHora() != null ? entrada.getFechaHora().format(DATE_TIME_FORMATTER) : "N/A")));
+                    table.addCell(new Cell().add(new Paragraph(entrada.getTipoReporte() != null ? entrada.getTipoReporte().getDescripcion() : "N/A")));
+                    table.addCell(new Cell().add(new Paragraph(entrada.getDiagnostico() != null ? entrada.getDiagnostico().getDescripcion() : "N/A")));
+                    table.addCell(new Cell().add(new Paragraph(detallesClinicos.toString().isEmpty() ? "N/A" : detallesClinicos.toString()).setFontSize(9)));
+                }
+                document.add(table);
+            } else {
+                document.add(new Paragraph("No hay entradas en el historial para este paciente.").setItalic());
+            }
+        } catch (IOException ioe) {
+            System.err.println("IOException al generar PDF principal: " + ioe.getMessage());
+            ioe.printStackTrace();
+            return generarPdfDeError("Error de E/S generando el documento PDF: " + ioe.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error generando PDF (general): " + e.getMessage());
+            e.printStackTrace();
+            return generarPdfDeError("Error generando el documento PDF: " + e.getMessage());
+        }
+        return new ByteArrayInputStream(baos.toByteArray());
     }
 
-    /**
-     * Genera un archivo CSV del historial del paciente.
-     * ESTA ES UNA IMPLEMENTACIÓN DE RELLENO. Debes implementar la lógica real de generación de CSV.
-     * @param paciente El paciente para el cual generar el historial.
-     * @return Un ByteArrayInputStream que contiene los datos del CSV.
-     */
-    public ByteArrayInputStream generarHistorialCsv(Paciente paciente) {
-        // TODO: Implementar la lógica de generación de CSV aquí.
-        // Por ahora, se devuelve un stream vacío o se podría lanzar una excepción.
-        // Ejemplo: usar Apache Commons CSV o OpenCSV.
-        System.err.println("ADVERTENCIA: generarHistorialCsv NO está implementado. Paciente: " + (paciente != null ? paciente.getNombre() : "null"));
-
-        StringBuilder csvContent = new StringBuilder();
-        csvContent.append("ID_Entrada,Fecha,Evento,Detalles,Estado\n"); // Cabecera del CSV
-        if (paciente != null && paciente.getHistorial() != null) {
-            // Este es un ejemplo muy básico de cómo podrías empezar
-            paciente.getHistorial().forEach(entrada -> {
-                csvContent.append(String.join(",",
-                        entrada.getId() != null ? entrada.getId().toString() : "N/A",
-                        entrada.getFechaHora() != null ? entrada.getFechaHora().toString() : "N/A",
-                        "\"" + (entrada.getEvento() != null ? entrada.getEvento().replace("\"", "\"\"") : "N/A") + "\"",
-                        "\"" + (entrada.getDetalles() != null ? entrada.getDetalles().replace("\"", "\"\"") : "N/A") + "\"",
-                        "\"" + (entrada.getEstado() != null ? entrada.getEstado().replace("\"", "\"\"") : "N/A") + "\""
-                )).append("\n");
-            });
-        } else {
-            csvContent.append("No hay datos de historial disponibles para el paciente: ").append(paciente != null ? paciente.getNombre() : "N/A").append("\n");
+    private ByteArrayInputStream generarPdfDeError(String mensajeErrorExterno) {
+        ByteArrayOutputStream baosError = new ByteArrayOutputStream();
+        try (PdfWriter errorWriter = new PdfWriter(baosError);
+             PdfDocument errorPdf = new PdfDocument(errorWriter);
+             Document errorDocument = new Document(errorPdf)) {
+            errorDocument.add(new Paragraph("Error al generar el PDF").setBold().setFontColor(ColorConstants.RED));
+            errorDocument.add(new Paragraph(mensajeErrorExterno != null ? mensajeErrorExterno : "Ocurrió un error desconocido."));
+        } catch (IOException ioe) {
+            System.err.println("IOException DENTRO de generarPdfDeError: " + ioe.getMessage());
+            ioe.printStackTrace();
+            return new ByteArrayInputStream(("Fallo crítico (IOException) al generar PDF de error: " + ioe.getMessage()).getBytes(StandardCharsets.UTF_8));
+        } catch (Exception ex) {
+            System.err.println("Exception DENTRO de generarPdfDeError: " + ex.getMessage());
+            ex.printStackTrace();
+            return new ByteArrayInputStream(("Fallo crítico (inesperado) al generar PDF de error: " + ex.getMessage()).getBytes(StandardCharsets.UTF_8));
         }
-        // En una implementación real, usarías una librería de CSV para formatear correctamente.
-        return new ByteArrayInputStream(csvContent.toString().getBytes(StandardCharsets.UTF_8));
+        return new ByteArrayInputStream(baosError.toByteArray());
+    }
+
+    public ByteArrayInputStream generarHistorialCsv(Paciente paciente) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (OutputStreamWriter osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+             PrintWriter pw = new PrintWriter(osw)) {
+
+            if (paciente != null) {
+                pw.println(formatCsvField("Historial Clínico del Paciente"));
+                pw.println(formatCsvField("Nombre:") + "," + formatCsvField(paciente.getNombre()));
+                pw.println(formatCsvField("Identificación:") + "," + formatCsvField(paciente.getIdentificacion()));
+                pw.println(formatCsvField("Sexo:") + "," + formatCsvField(paciente.getSexo() != null ? paciente.getSexo().getDescripcion() : "N/A"));
+                pw.println(formatCsvField("Edad:") + "," + formatCsvField(paciente.getEdad() != null ? paciente.getEdad().toString() + " años" : "N/A"));
+                pw.println(formatCsvField("Fecha de Exportación:") + "," + formatCsvField(LocalDateTime.now().format(DATE_TIME_FORMATTER)));
+                pw.println();
+            } else {
+                pw.println(formatCsvField("No se proporcionó información del paciente."));
+                pw.println();
+            }
+
+            pw.println("ID_Entrada,FechaHora,Tipo de Reporte,Diagnostico,Notas Adicionales / Detalles Clínicos");
+
+            if (paciente != null && paciente.getHistorial() != null && !paciente.getHistorial().isEmpty()) {
+                for (EntradaHistorial entrada : paciente.getHistorial()) {
+                    StringJoiner detallesClinicosCsv = new StringJoiner("; ");
+                    if (paciente.getEdadEstimadaLesion() != null) {
+                        detallesClinicosCsv.add("Edad Estimada Lesión: " + paciente.getEdadEstimadaLesion().getDescripcion());
+                    }
+                    if (paciente.getAreaCorporalAfectadaPredominante() != null) {
+                        detallesClinicosCsv.add("Área Corporal: " + paciente.getAreaCorporalAfectadaPredominante().getDescripcion());
+                    }
+                    if (paciente.getTipoPielFitzpatrick() != null) {
+                        detallesClinicosCsv.add("Tipo Piel: " + paciente.getTipoPielFitzpatrick().getDescripcion());
+                    }
+                    if (paciente.getTamanodeLesionGeneral() != null) {
+                        detallesClinicosCsv.add("Tamaño Lesión: " + paciente.getTamanodeLesionGeneral().getDescripcion());
+                    }
+                    if (paciente.getAntecedentesFamiliaresCancer() != null) {
+                        detallesClinicosCsv.add("Antecedentes Cáncer: " + paciente.getAntecedentesFamiliaresCancer().getDescripcion());
+                    }
+                    if (entrada.getDetalles() != null && !entrada.getDetalles().trim().isEmpty()) {
+                        detallesClinicosCsv.add("Motivo/Notas Entrada: " + entrada.getDetalles());
+                    }
+
+                    pw.printf("%s,%s,%s,%s,%s\n",
+                            formatCsvField(entrada.getId() != null ? entrada.getId().toString() : ""),
+                            formatCsvField(entrada.getFechaHora() != null ? entrada.getFechaHora().format(DATE_TIME_FORMATTER) : ""),
+                            formatCsvField(entrada.getTipoReporte() != null ? entrada.getTipoReporte().getDescripcion() : ""),
+                            formatCsvField(entrada.getDiagnostico() != null ? entrada.getDiagnostico().getDescripcion() : ""),
+                            formatCsvField(detallesClinicosCsv.toString().isEmpty() ? "N/A" : detallesClinicosCsv.toString())
+                    );
+                }
+            } else {
+                pw.println(formatCsvField("N/A") + "," + formatCsvField("N/A") + "," + formatCsvField("N/A") + "," + formatCsvField("N/A") + "," + formatCsvField("No hay datos de historial disponibles para el paciente: " + (paciente != null ? paciente.getNombre() : "N/A")));
+            }
+            pw.flush();
+        } catch (IOException e) {
+            System.err.println("Error generando CSV: " + e.getMessage());
+            e.printStackTrace();
+            return new ByteArrayInputStream(("Error al generar el CSV: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
+        }
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    private String formatCsvField(String data) {
+        if (data == null) {
+            return "";
+        }
+        String escapedData = data.replace("\"", "\"\"");
+        if (data.contains(",") || data.contains("\n") || data.contains("\"")) {
+            return "\"" + escapedData + "\"";
+        }
+        return escapedData;
     }
 }

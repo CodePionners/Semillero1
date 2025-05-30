@@ -1,13 +1,15 @@
 package org.sistemadegestiondelesionescutaneas.model;
 
-public enum Diagnostico { // Cambiado de private a public
-    BENIGNA("Benigna"), // Nota: Corregido el nombre del enum de Benigna a BENIGNA
-    MALIGNA("Maligna"), // Nota: Corregido el nombre del enum de Maligna a MALIGNA
-    INDETERMINADO("Indeterminado"); // Nota: Corregido el nombre del enum de Indeterminado a INDETERMINADO
+public enum Diagnostico {
+    BENIGNA("Benigna"),
+    MALIGNA("Maligna"),
+    INDETERMINADO("Indeterminado"),
+    SOSPECHOSO("Sospechoso"), // Podrías añadir más opciones si es necesario
+    NO_APLICA("No Aplica");   // Para casos donde no hay un diagnóstico clínico directo
 
     private final String descripcion;
 
-    Diagnostico(String descripcion) { // Constructor es implícitamente privado
+    Diagnostico(String descripcion) {
         this.descripcion = descripcion;
     }
 
@@ -15,4 +17,3 @@ public enum Diagnostico { // Cambiado de private a public
         return descripcion;
     }
 }
-

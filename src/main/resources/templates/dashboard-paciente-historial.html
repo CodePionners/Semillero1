@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Mi Historial de Consultas</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar { background-color: #0056b3; padding: 10px 25px; color: white; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar .user-info strong { margin-right: 15px; }
+        .navbar .logout-form button { background-color: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.95em; font-weight: 500; }
+
+        .paciente-main-nav { background-color: #e9ecef; padding: 0 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .paciente-main-nav ul { list-style-type: none; margin: 0; padding: 0; display: flex; }
+        .paciente-main-nav ul li a { display: block; color: #0056b3; text-align: center; padding: 14px 20px; text-decoration: none; font-weight: 500; font-size: 1em; }
+        .paciente-main-nav ul li a:hover, .paciente-main-nav ul li.active > a { background-color: #fff; color: #003875; border-top: 3px solid #0056b3; border-left: 1px solid #ced4da; border-right: 1px solid #ced4da; }
+
+        .footer { text-align: center; padding: 20px; background-color: #343a40; color: white; font-size: 0.9em; margin-top: auto; }
+        .historial-page-content-area { flex-grow: 1; padding: 25px; max-width: 1000px; margin: 0 auto; width: 90%; } /* Ajustado margin-top a 0 */
+        .main-content-box { background-color: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .content-title { font-size: 1.8em; color: #0056b3; margin-top: 0; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; text-align: center; }
+        .historial-table-container { margin-bottom: 30px; }
+        .historial-table { width: 100%; border-collapse: collapse; }
+        .historial-table th, .historial-table td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; font-size: 1em; }
+        .historial-table th { background-color: #f8f9fa; color: #333; font-weight: 600; }
+        .historial-table td { background-color: #fff; height: 45px; }
+        .action-buttons-container { text-align: center; margin-top: 30px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; }
+        .action-btn { background-color: #e9f5ff; color: #0056b3; border: 1px solid #b8d7f7; padding: 12px 25px; font-size: 1.1em; font-weight: 500; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s; }
+        .action-btn:hover { background-color: #d6eaf8; border-color: #0056b3; box-shadow: 0 2px 6px rgba(0,86,179,0.15); }
+        .action-btn .icon { margin-right: 10px; font-size: 1.3em; }
+         .action-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+        }
+        .action-btn.disabled:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            box-shadow: none;
+        }
+        .message { padding: 10px 15px; border-radius: 4px; margin: 15px 0; }
+        .success-message { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error-message { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+    </style>
+</head>
+<body>
+
+<header class="navbar"> <h1>MI PANEL</h1>
+    <div class="user-info">
+        <strong sec:authentication="name">Usuario</strong>
+        <form th:action="@{/logout}" method="post" style="display: inline; margin-left: 15px;" class="logout-form">
+            <button type="submit">Cerrar Sesión</button>
+        </form>
+    </div>
+</header>
+
+<nav class="paciente-main-nav">
+    <ul>
+        <li><a th:href="@{/paciente/historial}" th:classappend="${#strings.contains(requestURI, '/paciente/historial')} ? 'active' : ''">Mi Historial</a></li>
+    </ul>
+</nav>
+
+<main class="historial-page-content-area">
+    <div class="main-content-box">
+        <h1 class="content-title">
+            Mi Historial de Consultas
+            <span th:if="${pacienteSeleccionado != null}" th:text="${' (' + pacienteSeleccionado.nombre + ')'}"></span>
+        </h1>
+
+        <div th:if="${successMessage}" class="message success-message" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="message error-message" th:text="${errorMessage}"></div>
+
+        <div class="historial-table-container">
+            <table class="historial-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo de Reporte</th>
+                    <th>Diagnóstico</th>
+                    <th>Notas Adicionales / Detalles Clínicos</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(entradasHistorial)}">
+                    <td colspan="4" style="text-align:center; padding: 20px;">
+                        No tiene entradas en su historial actualmente.
+                    </td>
+                </tr>
+                <tr th:each="entrada : ${entradasHistorial}">
+                    <td th:text="${entrada.fechaHora != null ? #temporals.format(entrada.fechaHora, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                    <td th:text="${entrada.tipoReporte != null ? entrada.tipoReporte.descripcion : 'N/A'}"></td>
+                    <td th:text="${entrada.diagnostico != null ? entrada.diagnostico.descripcion : 'N/A'}"></td>
+                    <td th:text="${#strings.abbreviate( (entrada.getDetalles() != null ? entrada.getDetalles() : '') +
+                                             (pacienteSeleccionado != null && pacienteSeleccionado.getEdadEstimadaLesion() != null ? ' (Edad Lesión: ' + pacienteSeleccionado.getEdadEstimadaLesion().getDescripcion() + ')' : '') +
+                                             (pacienteSeleccionado != null && pacienteSeleccionado.getAreaCorporalAfectadaPredominante() != null ? ' (Área: ' + pacienteSeleccionado.getAreaCorporalAfectadaPredominante().getDescripcion() + ')' : '')
+                                             // Añade más campos del paciente aquí si es necesario
+                                             , 100)}">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="action-buttons-container">
+            <a th:href="${pacienteSeleccionado != null ? '/paciente/historial/descargar/' + pacienteSeleccionado.id + '/pdf' : '#'}"
+               th:classappend="${pacienteSeleccionado == null ? 'disabled' : ''}"
+               class="action-btn"
+               th:title="${pacienteSeleccionado != null ? 'Descargar Mi Historial en PDF' : 'Historial no disponible para descarga'}">
+                <span class="icon">&#x1F4E5;</span> Descargar PDF
+            </a>
+
+            <a th:href="${pacienteSeleccionado != null ? '/paciente/historial/descargar/' + pacienteSeleccionado.id + '/csv' : '#'}"
+               th:classappend="${pacienteSeleccionado == null ? 'disabled' : ''}"
+               class="action-btn"
+               th:title="${pacienteSeleccionado != null ? 'Descargar Mi Historial en CSV' : 'Historial no disponible para descarga'}">
+                <span class="icon">&#x1F4E4;</span> Descargar CSV
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="footer" th:insert="~{dashboard-medico :: footer}"></footer> </body>
+</html>

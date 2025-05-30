@@ -1,7 +1,9 @@
 package org.sistemadegestiondelesionescutaneas.service;
 
+import org.sistemadegestiondelesionescutaneas.model.Diagnostico;
 import org.sistemadegestiondelesionescutaneas.model.EntradaHistorial;
 import org.sistemadegestiondelesionescutaneas.model.Paciente;
+import org.sistemadegestiondelesionescutaneas.model.TipoReporte;
 import org.sistemadegestiondelesionescutaneas.repository.EntradaHistorialrepositorio;
 import org.sistemadegestiondelesionescutaneas.repository.Pacienterepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-// import org.hibernate.Hibernate; // Descomentar si se usa Hibernate.initialize
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,50 +64,56 @@ public class PacienteService {
     }
 
     @Transactional
-    public Paciente updatePaciente(Paciente pacienteConMotivoForm) {
-        Paciente pacienteExistente = pacienteRepositorio.findById(pacienteConMotivoForm.getId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + pacienteConMotivoForm.getId()));
+    public Paciente updatePaciente(Paciente pacienteForm) {
+        Paciente pacienteExistente = pacienteRepositorio.findById(pacienteForm.getId())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + pacienteForm.getId()));
 
-        pacienteExistente.setNombre(pacienteConMotivoForm.getNombre());
-        pacienteExistente.setEdad(pacienteConMotivoForm.getEdad());
-        pacienteExistente.setSexo(pacienteConMotivoForm.getSexo());
-        pacienteExistente.setEdadEstimadaLesion(pacienteConMotivoForm.getEdadEstimadaLesion());
-        pacienteExistente.setAreaCorporalAfectadaPredominante(pacienteConMotivoForm.getAreaCorporalAfectadaPredominante());
-        pacienteExistente.setTipoPielFitzpatrick(pacienteConMotivoForm.getTipoPielFitzpatrick());
-        pacienteExistente.setTamanodeLesionGeneral(pacienteConMotivoForm.getTamanodeLesionGeneral());
-        pacienteExistente.setAntecedentesFamiliaresCancer(pacienteConMotivoForm.getAntecedentesFamiliaresCancer());
+        pacienteExistente.setNombre(pacienteForm.getNombre());
+        pacienteExistente.setEdad(pacienteForm.getEdad());
+        pacienteExistente.setSexo(pacienteForm.getSexo());
+        pacienteExistente.setTipoReporteActual(pacienteForm.getTipoReporteActual());
+        pacienteExistente.setDiagnosticoPredominante(pacienteForm.getDiagnosticoPredominante());
+        pacienteExistente.setEdadEstimadaLesion(pacienteForm.getEdadEstimadaLesion());
+        pacienteExistente.setAreaCorporalAfectadaPredominante(pacienteForm.getAreaCorporalAfectadaPredominante());
+        pacienteExistente.setTipoPielFitzpatrick(pacienteForm.getTipoPielFitzpatrick());
+        pacienteExistente.setTamanodeLesionGeneral(pacienteForm.getTamanodeLesionGeneral());
+        pacienteExistente.setAntecedentesFamiliaresCancer(pacienteForm.getAntecedentesFamiliaresCancer());
 
         Paciente pacienteGuardado = pacienteRepositorio.save(pacienteExistente);
 
-        String motivoConsulta = pacienteConMotivoForm.getMotivoConsultaActual();
-        StringBuilder detallesHistorial = new StringBuilder();
-        boolean hayMotivo = motivoConsulta != null && !motivoConsulta.trim().isEmpty();
+        String motivoConsultaOAdicional = pacienteForm.getMotivoConsultaActual();
+        TipoReporte tipoReporteParaHistorial = pacienteGuardado.getTipoReporteActual();
+        Diagnostico diagnosticoParaHistorial = pacienteGuardado.getDiagnosticoPredominante();
 
-        if (hayMotivo) {
-            detallesHistorial.append("Motivo de Consulta/Actualización: \n").append(motivoConsulta.trim()).append("\n\n");
+        EntradaHistorial nuevaEntrada = new EntradaHistorial();
+        nuevaEntrada.setPaciente(pacienteGuardado);
+        nuevaEntrada.setFechaHora(LocalDateTime.now());
+
+        if (tipoReporteParaHistorial != null) {
+            nuevaEntrada.setEvento(tipoReporteParaHistorial.getDescripcion());
         } else {
-            detallesHistorial.append("Actualización de datos del paciente (sin motivo de consulta específico ingresado para esta actualización).\n\n");
+            nuevaEntrada.setEvento("Actualización de Datos");
         }
 
-        detallesHistorial.append("Datos del Paciente Registrados en esta Entrada:\n");
-        detallesHistorial.append("- Nombre: ").append(pacienteGuardado.getNombre()).append("\n");
-        detallesHistorial.append("- Edad: ").append(pacienteGuardado.getEdad() != null ? pacienteGuardado.getEdad() : "N/A").append("\n");
-        detallesHistorial.append("- Sexo: ").append(pacienteGuardado.getSexo() != null ? pacienteGuardado.getSexo().getDescripcion() : "N/A").append("\n");
-        detallesHistorial.append("- Identificación: ").append(pacienteGuardado.getIdentificacion() != null ? pacienteGuardado.getIdentificacion() : "N/A").append("\n");
-        detallesHistorial.append("- Edad Estimada Lesión: ").append(pacienteGuardado.getEdadEstimadaLesion() != null ? pacienteGuardado.getEdadEstimadaLesion().getDescripcion() : "N/A").append("\n");
-        detallesHistorial.append("- Área Corporal Afectada: ").append(pacienteGuardado.getAreaCorporalAfectadaPredominante() != null ? pacienteGuardado.getAreaCorporalAfectadaPredominante().getDescripcion() : "N/A").append("\n");
-        detallesHistorial.append("- Tipo Piel Fitzpatrick: ").append(pacienteGuardado.getTipoPielFitzpatrick() != null ? pacienteGuardado.getTipoPielFitzpatrick().getDescripcion() : "N/A").append("\n");
-        detallesHistorial.append("- Tamaño General Lesión: ").append(pacienteGuardado.getTamanodeLesionGeneral() != null ? pacienteGuardado.getTamanodeLesionGeneral().getDescripcion() : "N/A").append("\n");
-        detallesHistorial.append("- Antecedentes Cáncer Piel: ").append(pacienteGuardado.getAntecedentesFamiliaresCancer() != null ? pacienteGuardado.getAntecedentesFamiliaresCancer().getDescripcion() : "N/A").append("\n");
+        // Asignar el motivo de consulta (o notas) al campo 'detalles'
+        // Ya no se añade la frase "Actualización de datos del paciente (sin motivo...)"
+        nuevaEntrada.setDetalles(motivoConsultaOAdicional);
 
-        EntradaHistorial nuevaEntrada = new EntradaHistorial(
-                pacienteGuardado,
-                hayMotivo ? "Actualización de Datos y Consulta" : "Actualización de Datos de Paciente",
-                detallesHistorial.toString(),
-                "Registro completado"
-        );
+        nuevaEntrada.setTipoReporte(tipoReporteParaHistorial);
+        nuevaEntrada.setDiagnostico(diagnosticoParaHistorial);
+
+        if (diagnosticoParaHistorial != null) {
+            nuevaEntrada.setEstadoOriginal(diagnosticoParaHistorial.getDescripcion());
+        } else {
+            nuevaEntrada.setEstadoOriginal("No especificado");
+        }
+
         entradaHistorialRepositorio.save(nuevaEntrada);
-        logger.info("Nueva entrada de historial creada para paciente ID {}", pacienteGuardado.getId());
+        logger.info("Nueva entrada de historial creada para paciente ID {} con Evento: '{}', Tipo Reporte: {}, Diagnóstico: {}",
+                pacienteGuardado.getId(),
+                nuevaEntrada.getEvento(),
+                tipoReporteParaHistorial,
+                diagnosticoParaHistorial);
 
         return pacienteGuardado;
     }

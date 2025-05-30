@@ -24,6 +24,16 @@ public class Paciente {
     @Column(length = 20)
     private Sexo sexo;
 
+    // NUEVOS CAMPOS PARA EL FORMULARIO Y ÚLTIMO ESTADO CONOCIDO
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_reporte_actual", length = 50)
+    private TipoReporte tipoReporteActual;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "diagnostico_predominante", length = 50)
+    private Diagnostico diagnosticoPredominante;
+    // FIN NUEVOS CAMPOS
+
     @Column(name = "identificacion", unique = true, nullable = true, length = 50)
     private String identificacion;
 
@@ -64,7 +74,7 @@ public class Paciente {
     private Set<HistorialLesionPrevia> historialLesionesPrevias = new HashSet<>();
 
     @Transient
-    private String motivoConsultaActual;
+    private String motivoConsultaActual; // Para notas adicionales del formulario
 
     public Paciente() {}
 
@@ -77,6 +87,14 @@ public class Paciente {
     public void setEdad(Integer edad) { this.edad = edad; }
     public Sexo getSexo() { return sexo; }
     public void setSexo(Sexo sexo) { this.sexo = sexo; }
+
+    // Getters y Setters para nuevos campos
+    public TipoReporte getTipoReporteActual() { return tipoReporteActual; }
+    public void setTipoReporteActual(TipoReporte tipoReporteActual) { this.tipoReporteActual = tipoReporteActual; }
+    public Diagnostico getDiagnosticoPredominante() { return diagnosticoPredominante; }
+    public void setDiagnosticoPredominante(Diagnostico diagnosticoPredominante) { this.diagnosticoPredominante = diagnosticoPredominante; }
+    // Fin Getters y Setters para nuevos campos
+
     public String getIdentificacion() { return identificacion; }
     public void setIdentificacion(String identificacion) { this.identificacion = identificacion; }
     public EdadEstimada getEdadEstimadaLesion() { return edadEstimadaLesion; }
