@@ -93,12 +93,7 @@
                     <td th:text="${entrada.fechaHora != null ? #temporals.format(entrada.fechaHora, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
                     <td th:text="${entrada.tipoReporte != null ? entrada.tipoReporte.descripcion : 'N/A'}"></td>
                     <td th:text="${entrada.diagnostico != null ? entrada.diagnostico.descripcion : 'N/A'}"></td>
-                    <td th:text="${#strings.abbreviate( (entrada.getDetalles() != null ? entrada.getDetalles() : '') +
-                                             (pacienteSeleccionado != null && pacienteSeleccionado.getEdadEstimadaLesion() != null ? ' (Edad Lesión: ' + pacienteSeleccionado.getEdadEstimadaLesion().getDescripcion() + ')' : '') +
-                                             (pacienteSeleccionado != null && pacienteSeleccionado.getAreaCorporalAfectadaPredominante() != null ? ' (Área: ' + pacienteSeleccionado.getAreaCorporalAfectadaPredominante().getDescripcion() + ')' : '')
-                                             // Añade más campos del paciente aquí si es necesario
-                                             , 100)}">
-                    </td>
+                    <td th:text="${entrada.detalles != null ? #strings.abbreviate(entrada.detalles, 100) : 'N/A'}"></td>
                 </tr>
                 </tbody>
             </table>
