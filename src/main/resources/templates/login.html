@@ -1,44 +1,28 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- Fondo azul y contenedor centrado con estilo moderno -->
 <div class="login-container">
-    <div class="login-box">
-
-        <h2>Iniciar Sesión</h2>
-
-        <div th:if="${loginError}" class="error-message">
-            <p th:text="${loginError}"></p>
+    <h2>Iniciar Sesión</h2>
+    <form>
+        <div class="input-group">
+            <label for="username">Nombre de Usuario:</label>
+            <input type="text" id="username" name="username" required>
         </div>
-
-        <div th:if="${logoutMessage}" class="success-message">
-            <p th:text="${logoutMessage}"></p>
+        <div class="input-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
         </div>
-
-        <form th:action="@{/perform_login}" method="post">
-            <div class="form-group">
-                <label for="username">Nombre de Usuario:</label>
-                <input type="text" id="username" name="username" required autofocus />
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required />
-            </div>
-            <button type="submit">Iniciar Sesión</button>
-        </form>
-
-        <div class="links">
-            <p>¿No tienes cuenta? <a th:href="@{/registro}">Regístrate aquí</a></p>
-        </div>
-
-    </div>
+        <button type="submit" class="login-button">Iniciar Sesión</button>
+        <p class="register-link">
+            ¿No tienes cuenta? <a href="#">Regístrate aquí</a>
+        </p>
+    </form>
 </div>
-
 </body>
 </html>

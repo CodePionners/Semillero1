@@ -4,9 +4,9 @@
     <title>Dashboard Médico - Inicio</title>
     <meta charset="UTF-8"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-<!-- HEADER -->
 <header class="medico-header">
     <div class="user-info">
         <strong th:text="${#authentication.name}">Nombre Usuario</strong>
@@ -16,7 +16,6 @@
     </form>
 </header>
 
-<!-- NAV -->
 <nav class="medico-main-nav">
     <ul>
         <li class="active"><a th:href="@{/medico/dashboard}">Inicio</a></li>
@@ -25,9 +24,7 @@
     </ul>
 </nav>
 
-<!-- CONTENIDO PRINCIPAL -->
 <main class="dashboard-wrapper">
-    <!-- Sidebar izquierda -->
     <aside class="left-sidebar-stats">
         <h2 style="font-family: 'Arial Black', sans-serif;">DASHBOARD</h2>
         <ul>
@@ -38,9 +35,8 @@
         </ul>
     </aside>
 
-    <!-- Contenido central -->
     <section class="medico-content-area center-content-stats">
-        <h3>Diagnostico</h3>
+        <h3>Diagnóstico</h3>
         <div class="diagnostico-selector">
             <select>
                 <option>Lesión benigna</option>
@@ -49,43 +45,47 @@
         </div>
 
         <h4>Atributos clínicos</h4>
-        <ul class="atributos-clinicos-list">
-            <li>
-                <img th:src="@{/img/sexo.png}" alt="Sexo"> Sexo
-            </li>
-            <li>
-                <img th:src="@{/img/edad.png}" alt="Edad"> Edad estimada
-            </li>
-            <li>
-                <img th:src="@{/img/area.png}" alt="Área"> Área corporal afectada
-            </li>
-            <li>
-                <img th:src="@{/img/piel.png}" alt="Tipo de piel"> Tipo de piel
-            </li>
-            <li>
-                <img th:src="@{/img/lesion.png}" alt="Tamaño lesión"> Tamaño de la lesión
-            </li>
-            <li>
-                <img th:src="@{/img/cancer.png}" alt="Antecedente"> Antecedente familiares de cancer
-            </li>
-        </ul>
+        <div class="attributes-grid-medico">
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/sexo.png}" alt="Sexo">
+                <p>Sexo</p>
+            </div>
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/edad.png}" alt="Edad">
+                <p>Edad estimada</p>
+            </div>
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/area.png}" alt="Área">
+                <p>Área corporal afectada</p>
+            </div>
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/piel.png}" alt="Tipo de piel">
+                <p>Tipo de piel</p>
+            </div>
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/lesion.png}" alt="Tamaño lesión">
+                <p>Tamaño de la lesión</p>
+            </div>
+            <div class="attribute-card-medico">
+                <img th:src="@{/img/cancer.png}" alt="Antecedente">
+                <p>Antecedente familiar</p>
+            </div>
+        </div>
     </section>
 
-    <!-- Sidebar derecha -->
     <aside class="right-sidebar-stats">
         <h4><strong>Gestión de análisis dermatológicos</strong></h4>
-        <p>Administra y sube imágenes de estudios de piel para su posterior análisis clínico</p>
-        <div class="upload-section-stats">
-            <img src="/img/nube-subida.png" alt="Subir imagen" />
-            <a th:href="@{/medico/cargar-imagen}" class="upload-button-styled-as-link">Subir nueva imagen</a>
+        <p>Administra y sube imágenes de estudios de piel para su posterior análisis clínico.</p>
+        <div class="upload-section-stats-modern">
+            <i class="fas fa-cloud-upload-alt upload-cloud-icon"></i>
+            <p>Arrastra y suelta la imagen aquí o</p>
+            <a th:href="@{/medico/cargar-imagen}" class="upload-button-styled">Selecciona un archivo</a>
         </div>
     </aside>
 </main>
 
-<!-- FOOTER -->
 <footer class="footer">
     &copy; 2025 Sistema Médico. Todos los derechos reservados.
 </footer>
 </body>
 </html>
-
