@@ -116,5 +116,8 @@ public class PacienteService {
                 diagnosticoParaHistorial);
 
         return pacienteGuardado;
+
+
     }
 }
+
