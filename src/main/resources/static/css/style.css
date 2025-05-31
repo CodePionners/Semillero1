@@ -1,0 +1,230 @@
+/* ====== RESET GENERAL ====== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    height: 100%;
+}
+
+/* ====== HEADER SUPERIOR ====== */
+.medico-header {
+    background-color: #1e2a38;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logout-form button {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout-form button:hover {
+    background-color: #c9302c;
+}
+
+/* ====== NAV PRINCIPAL ====== */
+.medico-main-nav {
+    background-color: #2f3c4d;
+    padding: 10px 20px;
+}
+
+.medico-main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.medico-main-nav ul li {
+    position: relative;
+}
+
+.medico-main-nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 6px 10px;
+    display: block;
+}
+
+.medico-main-nav a:hover {
+    background-color: #3e4a5a;
+    border-radius: 4px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #445566;
+    min-width: 200px;
+    z-index: 1;
+    top: 30px;
+    left: 0;
+    border-radius: 4px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: #fff;
+    padding: 8px 12px;
+    display: block;
+    text-decoration: none;
+}
+
+.dropdown-content a:hover {
+    background-color: #556677;
+}
+
+/* ====== LAYOUT PRINCIPAL ====== */
+.dashboard-wrapper {
+    display: flex;
+    padding: 20px;
+}
+
+/* ====== SIDEBAR IZQUIERDO ====== */
+.left-sidebar-stats {
+    width: 220px;
+    background-color: #1e2a38;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    height: fit-content;
+    margin-right: 20px;
+}
+
+.left-sidebar-stats h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.left-sidebar-stats ul {
+    list-style: none;
+}
+
+.left-sidebar-stats ul li {
+    margin: 10px 0;
+}
+
+.left-sidebar-stats a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.left-sidebar-stats a:hover,
+.active-stat-link {
+    text-decoration: underline;
+}
+
+/* ====== CONTENIDO CENTRAL ====== */
+.medico-content-area {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.estadistica-main-container {
+    display: flex;
+    gap: 20px;
+}
+
+.center-content-stats {
+    flex: 2;
+}
+
+.center-content-stats h4 {
+    margin-bottom: 10px;
+}
+
+.diagnostico-selector select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+/* ====== ATRIBUTOS CLÍNICOS ====== */
+.atributos-clinicos-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.atributos-clinicos-list li {
+    display: flex;
+    align-items: center;
+    background-color: #f9fafb;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.atributos-clinicos-list img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    margin-right: 8px;
+}
+
+/* ====== SIDEBAR DERECHO ====== */
+.right-sidebar-stats {
+    flex: 1;
+    background-color: #f1f1f1;
+    padding: 15px;
+    border-left: 4px solid #007bff;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.upload-section-stats {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.upload-section-stats img {
+    width: 50px;
+    margin-bottom: 10px;
+}
+
+.upload-button-styled-as-link {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.upload-button-styled-as-link:hover {
+    background-color: #0056b3;
+}
+
+/* ====== FOOTER ====== */
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 30px;
+    background-color: #1e2a38;
+    color: #fff;
+}
